@@ -3,9 +3,10 @@ import csv
 from os import listdir
 import re
 import textmining
+import TensorToolbox
 
 def convertToCSV(term_document_matrix, files):
-    #Converts a tdm to csv
+    # Converts a tdm to csv
     with open("test.csv", "w", newline='') as csv_file:
         writer = csv.writer(csv_file)
         for entry in term_document_matrix:
@@ -19,7 +20,6 @@ def main():
     files = []
     first_occurences_corpus = {}
     text_names = []
-    pos = 1
     for file in listdir("Folger"):
         first_occurences = {}
         words = 0

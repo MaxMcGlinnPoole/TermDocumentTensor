@@ -1,0 +1,6 @@
+numpy==1.13.1
+scikit-learn==0.18.2
+scipy==0.19.1
+sklearn==0.0
+TensorToolbox==1.0.19
+textmining==1.0
