@@ -1,0 +1,5 @@
+textmining-1.0/*
+Folger/*
+venv/*
+*.pickle
+*.csv
