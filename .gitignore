@@ -1,0 +1,10 @@
+textmining-1.0/*
+textmining-1.0_v3/*
+Folger/*
+venv/*
+*.pickle
+*.csv
+
+*.xml
+
+*.iml
