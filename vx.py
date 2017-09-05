@@ -5,7 +5,7 @@ import re
 import textmining
 from tensorly.decomposition import parafac
 import numpy as np
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 
 class TermDocumentTensor():
     def __init__(self, directory, type="binary"):
@@ -13,9 +13,9 @@ class TermDocumentTensor():
         self.directory = directory
         self.type = type
         
-    def create_corpus(self, **kwargs):
+    def create_term_document_tensor(self, **kwargs):
         if self.type == "binary":
-            return self.create_binary_text_corpus(**kwargs)
+            return self.create_binary_term_document_tensor(**kwargs)
         else:
             return self.create_text_corpus(**kwargs)
 
@@ -35,9 +35,9 @@ class TermDocumentTensor():
             tdm.append(row)
         return tdm
     
-    def create_binary_text_corpus(self, **kwargs):
+    def create_binary_term_document_tensor(self, **kwargs):
         doc_content = []
-        for file in os.listdir(self.self.directory):
+        for file in os.listdir(self.directory):
             with open(self.directory + "/" + file, "rb") as file:
                 my_string = ""
                 while True:
@@ -50,7 +50,7 @@ class TermDocumentTensor():
         doc_names = os.listdir(self.directory)
 
         # Convert a collection of text documents to a matrix of token counts
-        vectorizer = CountVectorizer(**kwargs)
+        vectorizer = TfidfVectorizer(use_idf=False)
         # Learn the vocabulary dictionary and return term-document matrix.
         x1 = vectorizer.fit_transform(doc_content).toarray()
         vocab = ["vocab"]
@@ -63,13 +63,22 @@ class TermDocumentTensor():
         self.tdt = tdm
         return self.tdt
         
-    def convertToCSV(self):
+    def convert_term_document_tensor_to_csv(self):
         # Converts a tdm to csv
-        with open("test.csv", "w", newline='') as csv_file:
-            writer = csv.writer(csv_file)
-            for entry in self.tdt:
-                num_list = map(str, entry)
-                writer.writerow(num_list)
+        try:
+            tdt = self.tdt
+            # if the tdt is 3d or greater
+            if isinstance(self.tdt[0][0], list):
+                tdt = self.tdt[0]
+            with open("test.csv", "w", newline='') as csv_file:
+                writer = csv.writer(csv_file)
+                for entry in tdt:
+                    num_list = map(str, entry)
+                    writer.writerow(num_list)
+        except IndexError:
+            print("You must create the term document tensor")
+            return IndexError
+
 
     def create_term_document_tensor_text(self):
         mydoclist = []
@@ -120,34 +129,9 @@ class TermDocumentTensor():
         self.tdt = tdt
         return tdt
 
-    def create_ngram_file_tensor(self):
-        mydoclist = []
-        tdm = textmining.TermDocumentMatrix()
-        files = []
-        first_occurences_corpus = {}
-        text_names = []
-        number_files = 0
-        for file in os.listdir(self.directory):
-            number_files += 1
-            first_occurences = {}
-            words = 0
-            with open(self.directory + "/" + file, "rb") as file:
-                my_string = ""
-                while True:
-                    byte_hex = file.read(1).hex()
-                    if not byte_hex:
-                        print(byte_hex)
-                        break
-                    my_string += byte_hex + " "
-                tdm.add_doc(my_string)
-            break
-        tdm = list(tdm.rows(cutoff=1))
-        print(tdm)
-        print(len(tdm[0]))
-                    #print(line)
-
 def main():
     tdt = TermDocumentTensor("zeus_binaries")
-    tdt.create_text_corpus(stop_words=None)
+    tdt.create_term_document_tensor(stop_words=None)
+    tdt.convert_term_document_tensor_to_csv()
 
 main()
