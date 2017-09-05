@@ -37,17 +37,26 @@ class TermDocumentTensor():
     
     def create_binary_term_document_tensor(self, **kwargs):
         doc_content = []
-        for file in os.listdir(self.directory):
-            with open(self.directory + "/" + file, "rb") as file:
+        first_occurences_corpus = {}
+
+        for file_name in os.listdir(self.directory):
+            first_occurences = {}
+            byte_count = 0
+            with open(self.directory + "/" + file_name, "rb") as file:
                 my_string = ""
                 while True:
+                    byte_count += 1
                     byte_hex = file.read(1).hex()
+                    if byte_hex not in first_occurences:
+                        first_occurences[byte_hex] = byte_count
                     if not byte_hex:
                         print(byte_hex)
                         break
                     my_string += byte_hex + " "
+                first_occurences_corpus[file_name] = first_occurences
             doc_content.append(my_string)
         doc_names = os.listdir(self.directory)
+        print(first_occurences_corpus)
 
         # Convert a collection of text documents to a matrix of token counts
         vectorizer = TfidfVectorizer(use_idf=False)
@@ -60,7 +69,24 @@ class TermDocumentTensor():
             row = [doc_names[i]]
             row.extend(x1[i])
             tdm.append(row)
-        self.tdt = tdm
+        tdm_first_occurences = [vocab]
+        # tdm_first_occurences[0] = tdm[0]
+        # Create a first occurences matrix that corresponds with the tdm
+        for j in range(len(doc_names)):
+            item = doc_names[j]
+            this_tdm = [item]
+            for i in range(0, len(tdm[0])):
+                word = tdm[0][i]
+                try:
+                    print(first_occurences_corpus[item])
+                    this_tdm.append(first_occurences_corpus[item][word])
+                except:
+                    this_tdm.append(0)
+            # print(this_tdm)
+            tdm_first_occurences.append(this_tdm)
+
+        tdt = [tdm, tdm_first_occurences]
+        self.tdt = tdt
         return self.tdt
         
     def convert_term_document_tensor_to_csv(self):
@@ -78,7 +104,6 @@ class TermDocumentTensor():
         except IndexError:
             print("You must create the term document tensor")
             return IndexError
-
 
     def create_term_document_tensor_text(self):
         mydoclist = []
