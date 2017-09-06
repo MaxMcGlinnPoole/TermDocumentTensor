@@ -9,7 +9,9 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 
 class TermDocumentTensor():
     def __init__(self, directory, type="binary"):
+        self.vocab = []
         self.tdt = []
+        self.corpus_names = []
         self.directory = directory
         self.type = type
         
@@ -50,35 +52,33 @@ class TermDocumentTensor():
                     if byte_hex not in first_occurences:
                         first_occurences[byte_hex] = byte_count
                     if not byte_hex:
-                        print(byte_hex)
                         break
                     my_string += byte_hex + " "
                 first_occurences_corpus[file_name] = first_occurences
             doc_content.append(my_string)
         doc_names = os.listdir(self.directory)
-        print(first_occurences_corpus)
 
         # Convert a collection of text documents to a matrix of token counts
         vectorizer = TfidfVectorizer(use_idf=False)
         # Learn the vocabulary dictionary and return term-document matrix.
         x1 = vectorizer.fit_transform(doc_content).toarray()
-        vocab = ["vocab"]
-        vocab.extend(vectorizer.get_feature_names())
-        tdm = [vocab]
+        self.vocab = ["vocab"]
+
+        self.vocab.extend(vectorizer.get_feature_names())
+        tdm = []
         for i in range(len(doc_names)):
-            row = [doc_names[i]]
-            row.extend(x1[i])
+            row = x1[i]
             tdm.append(row)
-        tdm_first_occurences = [vocab]
+        tdm_first_occurences = []
+        self.corpus_names = doc_names
         # tdm_first_occurences[0] = tdm[0]
         # Create a first occurences matrix that corresponds with the tdm
         for j in range(len(doc_names)):
             item = doc_names[j]
-            this_tdm = [item]
+            this_tdm = []
             for i in range(0, len(tdm[0])):
-                word = tdm[0][i]
+                word = self.vocab[i]
                 try:
-                    print(first_occurences_corpus[item])
                     this_tdm.append(first_occurences_corpus[item][word])
                 except:
                     this_tdm.append(0)
@@ -87,6 +87,7 @@ class TermDocumentTensor():
 
         tdt = [tdm, tdm_first_occurences]
         self.tdt = tdt
+        print(tdt)
         return self.tdt
         
     def convert_term_document_tensor_to_csv(self):
@@ -154,9 +155,12 @@ class TermDocumentTensor():
         self.tdt = tdt
         return tdt
 
+    def parafac_decomposition(self):
+        return parafac(np.array(self.tdt), 2)
 def main():
     tdt = TermDocumentTensor("zeus_binaries")
     tdt.create_term_document_tensor(stop_words=None)
     tdt.convert_term_document_tensor_to_csv()
+    print(tdt.parafac_decomposition())
 
 main()
