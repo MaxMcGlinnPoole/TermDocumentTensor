@@ -6,6 +6,9 @@ import textmining
 from tensorly.decomposition import parafac
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+import plotly
+from plotly.graph_objs import *
+
 
 class TermDocumentTensor():
     def __init__(self, directory, type="binary"):
@@ -87,7 +90,6 @@ class TermDocumentTensor():
 
         tdt = [tdm, tdm_first_occurences]
         self.tdt = tdt
-        print(tdt)
         return self.tdt
         
     def convert_term_document_tensor_to_csv(self):
@@ -156,11 +158,18 @@ class TermDocumentTensor():
         return tdt
 
     def parafac_decomposition(self):
-        return parafac(np.array(self.tdt), 2)
+        return parafac(np.array(self.tdt), 1)
 def main():
     tdt = TermDocumentTensor("zeus_binaries")
     tdt.create_term_document_tensor(stop_words=None)
     tdt.convert_term_document_tensor_to_csv()
-    print(tdt.parafac_decomposition())
+    factors = tdt.parafac_decomposition()
+    plotly.tools.set_credentials_file(username='MaxPoole', api_key='2ajqCLZjiLNDFxgyLtGn')
+    factor_trace_1 = Scatter(
+        x=tdt.corpus_names,
+        y=factors[1]
+    )
+    data = Data([factor_trace_1])
+    plotly.plotly.plot(data, filename = 'basic-line')
 
 main()
