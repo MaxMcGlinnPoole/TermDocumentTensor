@@ -1,14 +1,13 @@
 
 import csv
 import os
-import re
 import textmining
 from tensorly.decomposition import parafac
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 import plotly
 from plotly.graph_objs import *
-
+from collections import deque
 
 class TermDocumentTensor():
     def __init__(self, directory, type="binary"):
@@ -17,6 +16,12 @@ class TermDocumentTensor():
         self.corpus_names = []
         self.directory = directory
         self.type = type
+
+    def print_formatted_term_document_tensor(self):
+        for matrix in self.tdt:
+            print(self.vocab)
+            for i in range(len(matrix)):
+                print(self.corpus_names[i], matrix[i])
         
     def create_term_document_tensor(self, **kwargs):
         if self.type == "binary":
@@ -43,20 +48,28 @@ class TermDocumentTensor():
     def create_binary_term_document_tensor(self, **kwargs):
         doc_content = []
         first_occurences_corpus = {}
+        ngrams = kwargs["ngrams"] if kwargs["ngrams"] is not None else 1
+        print(ngrams)
 
         for file_name in os.listdir(self.directory):
+            previous_bytes = deque()
             first_occurences = {}
             byte_count = 0
             with open(self.directory + "/" + file_name, "rb") as file:
                 my_string = ""
                 while True:
                     byte_count += 1
-                    byte_hex = file.read(1).hex()
-                    if byte_hex not in first_occurences:
-                        first_occurences[byte_hex] = byte_count
-                    if not byte_hex:
+                    current_byte = file.read(1).hex()
+                    if not current_byte:
                         break
-                    my_string += byte_hex + " "
+                    if byte_count >= ngrams:
+                        byte_gram = "".join(list(previous_bytes)) + current_byte
+                        if byte_gram not in first_occurences:
+                            first_occurences[byte_gram] = byte_count
+                        if byte_count % ngrams == 0:
+                            my_string += byte_gram + " "
+                        previous_bytes.popleft()
+                    previous_bytes.append(current_byte)
                 first_occurences_corpus[file_name] = first_occurences
             doc_content.append(my_string)
         doc_names = os.listdir(self.directory)
@@ -161,15 +174,16 @@ class TermDocumentTensor():
         return parafac(np.array(self.tdt), 1)
 def main():
     tdt = TermDocumentTensor("zeus_binaries")
-    tdt.create_term_document_tensor(stop_words=None)
+    tdt.create_term_document_tensor(stop_words=None, ngrams=3)
     tdt.convert_term_document_tensor_to_csv()
     factors = tdt.parafac_decomposition()
+    tdt.print_formatted_term_document_tensor()
     plotly.tools.set_credentials_file(username='MaxPoole', api_key='2ajqCLZjiLNDFxgyLtGn')
     factor_trace_1 = Scatter(
         x=tdt.corpus_names,
         y=factors[1]
     )
     data = Data([factor_trace_1])
-    plotly.plotly.plot(data, filename = 'basic-line')
+    #plotly.plotly.plot(data, filename = 'basic-line')
 
 main()
