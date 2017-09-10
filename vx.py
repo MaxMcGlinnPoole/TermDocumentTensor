@@ -16,6 +16,48 @@ class TermDocumentTensor():
         self.corpus_names = []
         self.directory = directory
         self.type = type
+        self.rank_approximation = None
+
+    def get_estimated_rank(self):
+        """
+        Getting the rank of a tensor is an NP hard problem
+        Therefore we use an estimation based on the size of the dimensions of our tensor.
+        These numbers are grabbed from Table 3.3 of Tammy Kolda's paper:
+        http://www.sandia.gov/~tgkolda/pubs/pubfiles/TensorReview.pdf
+        :return:
+        """
+        # At the moment the rank returned by this function is normally too high for either
+        # my machine or the tensorly library to handle, therefore I have made it just return 1 for right now
+
+        return 1
+        I = len(self.tdt[0])
+        J = len(self.tdt[0][0])
+        K = len(self.tdt)
+
+        if I == 1 or J == 1 or K == 1:
+            return 1
+        elif I == J == K == 2:
+            return 2
+        elif I == J == 3 and K == 2:
+            return 3
+        elif I == 5 and J == K == 3:
+            return 5
+        elif I >= 2*J and K == 2:
+            return 2*J
+        elif 2*J > I > J and K ==2:
+            return I
+        elif I == J and K == 2:
+            return I
+        elif I >= J*K:
+            return J*K
+        elif J*K - J < I < J*K:
+            return I
+        elif I == J*K - I:
+            return I
+        else:
+            print(I, J, K, "did not have an exact estimation")
+            return min(I*J, I*K, J*K)
+
 
     def print_formatted_term_document_tensor(self):
         for matrix in self.tdt:
@@ -171,13 +213,15 @@ class TermDocumentTensor():
         return tdt
 
     def parafac_decomposition(self):
-        return parafac(np.array(self.tdt), 1)
+        return parafac(np.array(self.tdt), self.get_estimated_rank())
+
+
 def main():
     tdt = TermDocumentTensor("zeus_binaries")
-    tdt.create_term_document_tensor(stop_words=None, ngrams=3)
+    tdt.create_term_document_tensor(stop_words=None, ngrams=2)
     tdt.convert_term_document_tensor_to_csv()
     factors = tdt.parafac_decomposition()
-    tdt.print_formatted_term_document_tensor()
+    #tdt.print_formatted_term_document_tensor()
     plotly.tools.set_credentials_file(username='MaxPoole', api_key='2ajqCLZjiLNDFxgyLtGn')
     factor_trace_1 = Scatter(
         x=tdt.corpus_names,
