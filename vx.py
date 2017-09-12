@@ -2,6 +2,7 @@
 import csv
 import os
 import textmining
+import tensorly.tenalg
 from tensorly.decomposition import parafac
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
@@ -17,6 +18,12 @@ class TermDocumentTensor():
         self.directory = directory
         self.type = type
         self.rank_approximation = None
+        self.factor_matrices = []
+        # These are the output of our tensor decomposition.
+        self.factors = []
+
+    def create_factor_matrices(self):
+        print(tensorly.tenalg.khatri_rao([self.factors[2], self.factors[1]]))
 
     def get_estimated_rank(self):
         """
@@ -57,7 +64,6 @@ class TermDocumentTensor():
         else:
             print(I, J, K, "did not have an exact estimation")
             return min(I*J, I*K, J*K)
-
 
     def print_formatted_term_document_tensor(self):
         for matrix in self.tdt:
@@ -110,8 +116,10 @@ class TermDocumentTensor():
                             first_occurences[byte_gram] = byte_count
                         if byte_count % ngrams == 0:
                             my_string += byte_gram + " "
-                        previous_bytes.popleft()
-                    previous_bytes.append(current_byte)
+                        if ngrams > 1:
+                            previous_bytes.popleft()
+                    if ngrams > 1:
+                        previous_bytes.append(current_byte)
                 first_occurences_corpus[file_name] = first_occurences
             doc_content.append(my_string)
         doc_names = os.listdir(self.directory)
@@ -213,12 +221,13 @@ class TermDocumentTensor():
         return tdt
 
     def parafac_decomposition(self):
-        return parafac(np.array(self.tdt), self.get_estimated_rank())
+        self.factors = parafac(np.array(self.tdt), self.get_estimated_rank())
+        return self.factors
 
 
 def main():
     tdt = TermDocumentTensor("zeus_binaries")
-    tdt.create_term_document_tensor(stop_words=None, ngrams=2)
+    tdt.create_term_document_tensor(stop_words=None, ngrams=1)
     tdt.convert_term_document_tensor_to_csv()
     factors = tdt.parafac_decomposition()
     #tdt.print_formatted_term_document_tensor()
@@ -227,6 +236,7 @@ def main():
         x=tdt.corpus_names,
         y=factors[1]
     )
+    print(tensorly.tenalg.khatri_rao(factors))
     data = Data([factor_trace_1])
     #plotly.plotly.plot(data, filename = 'basic-line')
 
