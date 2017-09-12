@@ -2,7 +2,7 @@
 import csv
 import os
 import textmining
-import tensorly.tenalg
+from tensorly.tenalg import khatri_rao
 from tensorly.decomposition import parafac
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
@@ -23,8 +23,11 @@ class TermDocumentTensor():
         self.factors = []
 
     def create_factor_matrices(self):
-        print(tensorly.tenalg.khatri_rao([self.factors[2], self.factors[1]]))
-
+        tdm_1 = np.matmul(self.factors[0], np.transpose(khatri_rao([self.factors[2], self.factors[1]])))
+        tdm_2 = np.matmul(self.factors[1], np.transpose(khatri_rao([self.factors[2], self.factors[0]])))
+        tdm_3 = np.matmul(self.factors[2], np.transpose(khatri_rao([self.factors[1], self.factors[0]])))
+        self.factors = [tdm_1, tdm_2, tdm_3]
+        return self.factors
     def get_estimated_rank(self):
         """
         Getting the rank of a tensor is an NP hard problem
@@ -236,7 +239,7 @@ def main():
         x=tdt.corpus_names,
         y=factors[1]
     )
-    print(tensorly.tenalg.khatri_rao(factors))
+    print(tdt.create_factor_matrices())
     data = Data([factor_trace_1])
     #plotly.plotly.plot(data, filename = 'basic-line')
 
