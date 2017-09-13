@@ -6,6 +6,7 @@ from tensorly.tenalg import khatri_rao
 from tensorly.decomposition import parafac
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from scipy import spatial
 import plotly
 from plotly.graph_objs import *
 from collections import deque
@@ -28,6 +29,16 @@ class TermDocumentTensor():
         tdm_3 = np.matmul(self.factors[2], np.transpose(khatri_rao([self.factors[1], self.factors[0]])))
         self.factors = [tdm_1, tdm_2, tdm_3]
         return self.factors
+
+    def generate_cosine_similarity_matrix(self, matrix):
+        cosine_sim = []
+        for entry in matrix:
+            sim = []
+            for other_entry in matrix:
+                sim.append(spatial.distance.cosine(entry, other_entry))
+            cosine_sim.append(sim)
+        return cosine_sim
+
     def get_estimated_rank(self):
         """
         Getting the rank of a tensor is an NP hard problem
@@ -233,14 +244,16 @@ def main():
     tdt.create_term_document_tensor(stop_words=None, ngrams=1)
     tdt.convert_term_document_tensor_to_csv()
     factors = tdt.parafac_decomposition()
+    factor_matrices = tdt.create_factor_matrices()
+    cos_sim = tdt.generate_cosine_similarity_matrix(factor_matrices[1])
     #tdt.print_formatted_term_document_tensor()
     plotly.tools.set_credentials_file(username='MaxPoole', api_key='2ajqCLZjiLNDFxgyLtGn')
-    factor_trace_1 = Scatter(
-        x=tdt.corpus_names,
-        y=factors[1]
-    )
-    print(tdt.create_factor_matrices())
-    data = Data([factor_trace_1])
-    #plotly.plotly.plot(data, filename = 'basic-line')
+    data = [
+        Surface(
+            z=cos_sim
+        )
+    ]
+    print()
+    plotly.plotly.plot(data, filename = 'basic-line')
 
 main()
