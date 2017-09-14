@@ -10,6 +10,8 @@ from scipy import spatial
 import plotly
 from plotly.graph_objs import *
 from collections import deque
+import matplotlib.pyplot as plt
+
 
 class TermDocumentTensor():
     def __init__(self, directory, type="binary"):
@@ -248,12 +250,7 @@ def main():
     cos_sim = tdt.generate_cosine_similarity_matrix(factor_matrices[1])
     #tdt.print_formatted_term_document_tensor()
     plotly.tools.set_credentials_file(username='MaxPoole', api_key='2ajqCLZjiLNDFxgyLtGn')
-    data = [
-        Surface(
-            z=cos_sim
-        )
-    ]
-    print()
-    plotly.plotly.plot(data, filename = 'basic-line')
+    plt.imshow(cos_sim, cmap='hot')
+    plt.show()
 
 main()
