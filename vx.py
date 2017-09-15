@@ -1,7 +1,6 @@
-
+import textmining
 import csv
 import os
-import textmining
 from tensorly.tenalg import khatri_rao
 from tensorly.decomposition import parafac
 import numpy as np
@@ -11,7 +10,7 @@ import plotly
 from plotly.graph_objs import *
 from collections import deque
 import matplotlib.pyplot as plt
-
+import re
 
 class TermDocumentTensor():
     def __init__(self, directory, type="binary"):
@@ -92,22 +91,8 @@ class TermDocumentTensor():
             return self.create_binary_term_document_tensor(**kwargs)
         else:
             return self.create_text_corpus(**kwargs)
-
-    def create_text_corpus(self, **kwargs):
-        doc_names = os.listdir(self.directory)
-        doc_content = [open(os.path.join(self.directory, file)).read() for file in os.listdir(self.directory)]
-        # Convert a collection of text documents to a matrix of token counts
-        vectorizer = CountVectorizer(**kwargs)
-        # Learn the vocabulary dictionary and return term-document matrix.
-        x1 = vectorizer.fit_transform(doc_content).toarray()
-        vocab = ["vocab"]
-        vocab.extend(vectorizer.get_feature_names())
-        tdm = [vocab]
-        for i in range(len(doc_names)):
-            row = [doc_names[i]]
-            row.extend(x1[i])
-            tdm.append(row)
-        return tdm
+    
+    
     
     def create_binary_term_document_tensor(self, **kwargs):
         doc_content = []
@@ -201,8 +186,10 @@ class TermDocumentTensor():
             with open(self.directory + "/" + file, "r") as shake:
                 files.append(file)
                 lines_100 = ""
-                for i in range(2):
+                while True:
                     my_line = shake.readline()
+                    if not my_line:
+                        break
                     re.sub(r'\W+', '', my_line)
                     for word in my_line.split():
                         words += 1
@@ -229,7 +216,8 @@ class TermDocumentTensor():
                     this_tdm.append(0)
             # print(this_tdm)
             tdm_first_occurences.append(this_tdm)
-        tdm.pop(0)
+        self.vocab = tdm.pop(0)
+        self.corpus_names = mydoclist
         tdt[0] = tdm
         tdt[1] = tdm_first_occurences
         tdt = np.asanyarray(tdt)
@@ -242,8 +230,9 @@ class TermDocumentTensor():
 
 
 def main():
-    tdt = TermDocumentTensor("zeus_binaries")
-    tdt.create_term_document_tensor(stop_words=None, ngrams=1)
+    tdt = TermDocumentTensor("Folger")
+    tdt.create_term_document_tensor_text()
+    return
     tdt.convert_term_document_tensor_to_csv()
     factors = tdt.parafac_decomposition()
     factor_matrices = tdt.create_factor_matrices()
