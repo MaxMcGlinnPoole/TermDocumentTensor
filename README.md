@@ -35,7 +35,7 @@ Creates a binary document-term tensor (matrix) populated using term freqencies a
 
 - [ ] Add/Modify dimensionality
 - [ ] Implement a clearer data visualization technique
-- [ ] Add command line functionlaity
+- [ ] Add command line functionality
 
 ## Authors 
 Meet our research team
