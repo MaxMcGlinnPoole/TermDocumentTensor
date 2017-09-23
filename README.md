@@ -13,9 +13,7 @@ Creates a binary document-term tensor (matrix) populated using term freqencies a
 ### Installation
 <<<<<<< HEAD
 ```
-=======
->>>>>>> 115d80884ab8d83ee9f4aa762063b71ffdbd4641
-<!--- *** content *** -->
+
 ```
 
 ### Contributing
