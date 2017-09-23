@@ -21,13 +21,13 @@ Creates a binary document-term tensor (matrix) populated using term freqencies a
   ```sh
   git clone https://github.com/MaxMcGlinnPoole/TermDocumentTensor.git
   ```
-  **Choose your own destination path. The directory this command in ran is where there folder will be located**
+  **Choose your own destination path. The directory this command is ran in where there folder will be located**
 
 2. Switch to the directory: `cd TermDocumentTensor` 
-3. Create your new branch: `git checkout -b feature name`
+3. Create your new branch: `git checkout -b branch name`
 4. Make necessary changes to this source code
 5. Add changes to git index by using `git add --all .`
-6. Commit your changes: `git commit -am 'Added new feature'`
+6. Commit your changes: `git commit -am 'update description'`
 7. Push to the branch: `git push`
 8. Submit a [new pull request](https://github.com/MaxMcGlinnPoole/TermDocumentTensor/pull/new)
 
