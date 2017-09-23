@@ -12,7 +12,7 @@ Creates a binary document-term tensor (matrix) populated using term freqencies a
 
 ### Installation
 
-[comment]: <> *** content *** 
+<!--- *** content *** -->
 
 ### Contributing
 
