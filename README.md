@@ -11,7 +11,9 @@ Creates a binary document-term tensor (matrix) populated using term freqencies a
 * Python Text Mining Package
 
 ### Installation
+```
 <!--- *** content *** -->
+```
 
 ### Contributing
 
