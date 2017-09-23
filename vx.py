@@ -12,6 +12,7 @@ from collections import deque
 import matplotlib.pyplot as plt
 import re
 
+
 class TermDocumentTensor():
     def __init__(self, directory, type="binary"):
         self.vocab = []
@@ -36,7 +37,7 @@ class TermDocumentTensor():
         for entry in matrix:
             sim = []
             for other_entry in matrix:
-                sim.append(spatial.distance.cosine(entry, other_entry))
+                sim.append(spatial.distance.cosine(entry, other_entry)*-1 + 1)
             cosine_sim.append(sim)
         return cosine_sim
 
@@ -51,7 +52,6 @@ class TermDocumentTensor():
         # At the moment the rank returned by this function is normally too high for either
         # my machine or the tensorly library to handle, therefore I have made it just return 1 for right now
 
-        return 1
         I = len(self.tdt[0])
         J = len(self.tdt[0][0])
         K = len(self.tdt)
@@ -91,9 +91,7 @@ class TermDocumentTensor():
             return self.create_binary_term_document_tensor(**kwargs)
         else:
             return self.create_text_corpus(**kwargs)
-    
-    
-    
+
     def create_binary_term_document_tensor(self, **kwargs):
         doc_content = []
         first_occurences_corpus = {}
@@ -225,21 +223,23 @@ class TermDocumentTensor():
         return tdt
 
     def parafac_decomposition(self):
-        self.factors = parafac(np.array(self.tdt), self.get_estimated_rank())
+        self.factors = parafac(np.array(self.tdt), rank=self.get_estimated_rank())
         return self.factors
 
 
 def main():
-    tdt = TermDocumentTensor("Folger")
-    tdt.create_term_document_tensor_text()
-    return
+    tdt = TermDocumentTensor("zeus_binaries", type="binary")
+    tdt.create_binary_term_document_tensor(ngrams=1)
     tdt.convert_term_document_tensor_to_csv()
+    print(tdt.get_estimated_rank())
     factors = tdt.parafac_decomposition()
     factor_matrices = tdt.create_factor_matrices()
     cos_sim = tdt.generate_cosine_similarity_matrix(factor_matrices[1])
     #tdt.print_formatted_term_document_tensor()
     plotly.tools.set_credentials_file(username='MaxPoole', api_key='2ajqCLZjiLNDFxgyLtGn')
-    plt.imshow(cos_sim, cmap='hot')
+    fig, ax1 = plt.subplots(1, 1)
+    ax1.imshow(cos_sim, cmap='hot')
+    print(tdt.corpus_names)
     plt.show()
 
 main()
