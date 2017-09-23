@@ -4,7 +4,7 @@ Creates a binary document-term tensor (matrix) populated using term freqencies a
 
 ### Requirements
 
-* Python 2.0 or higher
+* Python 3.0 or higher
 
 #### Used Libraries 
 
