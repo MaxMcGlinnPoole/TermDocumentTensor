@@ -19,11 +19,12 @@ def convert_term_document_tensor_to_csv(tdt, file_name):
             writer.writerow(num_list)
 
 
-def generate_term_list_csv(corpus_name, file_name, number_terms = 100, numerical_rep=False, binary=True):
+def generate_term_list_csv(corpus_name, file_name, number_terms = 61, numerical_rep=False, binary=True):
     """
     Creates a csv file that simply lists the terms in the documents in order
     :param corpus_name: Name of the directory that contains the files to be read
-    :param number_terms: The number of terms to be read in a row
+    :param number_terms: The number of terms to be read in a row.
+                         A default value of 61 is given due to the limitations of the ensign tool.
     :param file_name: The name of the csv file that the term list will be written to
     :param number_terms: The number of terms to write to the csv file
     :param numerical_rep: Whether or not we should convert the hex bytes in the binary file into a integer.
