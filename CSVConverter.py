@@ -19,7 +19,7 @@ def convert_term_document_tensor_to_csv(tdt, file_name):
             writer.writerow(num_list)
 
 
-def generate_term_list_csv(corpus_name, file_name, number_terms = 61, numerical_rep=False, binary=True):
+def generate_term_list_csv(corpus_name, file_name, number_terms = 61, binary=True,**kwargs):
     """
     Creates a csv file that simply lists the terms in the documents in order
     :param corpus_name: Name of the directory that contains the files to be read
@@ -32,12 +32,12 @@ def generate_term_list_csv(corpus_name, file_name, number_terms = 61, numerical_
     :return: None
     """
     if binary:
-        generate_binary_term_list(corpus_name, file_name, number_terms, numerical_rep)
+        generate_binary_term_list(corpus_name, file_name, **kwargs)
     else:
-        generate_text_term_list(corpus_name, file_name, number_terms)
+        generate_text_term_list(corpus_name, file_name,  **kwargs)
 
 
-def generate_binary_term_list(corpus_name, file_name, number_terms, numerical_rep):
+def generate_binary_term_list(corpus_name, file_name, number_terms=61, numerical_rep=False, **kwargs):
     """
     Creates a term list for binary documents as a csv file
     Meant to be called from generate_term_list_csv
@@ -66,10 +66,10 @@ def generate_binary_term_list(corpus_name, file_name, number_terms, numerical_re
         my_binary.append(curr)
         # print(curr)
 
-    write_term_list_to_csv(file_name, my_binary, number_terms)
+    write_term_list_to_csv(file_name, my_binary, number_terms, **kwargs)
 
 
-def generate_text_term_list(corpus_name, file_name, number_terms):
+def generate_text_term_list(corpus_name, file_name, number_terms=61, **kwargs):
     """
     Creates a term list of text documents as a csv file
     Meant to be called from generate_term_list_csv
@@ -93,19 +93,24 @@ def generate_text_term_list(corpus_name, file_name, number_terms):
                     count += 1
         my_terms.append(curr)
         # print(curr)
-        write_term_list_to_csv(file_name, my_terms, number_terms)
+        write_term_list_to_csv(file_name, my_terms, number_terms, **kwargs)
 
 
-def write_term_list_to_csv(file_name, my_terms, number_terms):
+def write_term_list_to_csv(file_name, my_terms, number_terms, transpose=False):
     """
     Writes the terms list to a csv file
     Meant to be called by the generate_term_list files
     :return: None
     """
+    my_csv_rep = []
+    header = ["files"]
+    header.extend(["byte" + str(i) for i in range(0, number_terms)])
+    my_csv_rep.append(header)
+    my_csv_rep.extend(my_terms)
+    if transpose:
+        my_csv_rep = list(map(list, zip(*my_csv_rep)))
+    #create the representation
     with open(file_name + ".csv", "w") as w:
         csv_file = csv.writer(w)
-        header = ["files"]
-        header.extend(["byte" + str(i) for i in range(0, number_terms)])
-        csv_file.writerow(header)
-        for row in my_terms:
+        for row in my_csv_rep:
             csv_file.writerow(row)
