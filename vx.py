@@ -6,11 +6,9 @@ from tensorly.decomposition import parafac
 import numpy as np
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from scipy import spatial
-import plotly
-from plotly.graph_objs import *
 from collections import deque
-import matplotlib.pyplot as plt
 import re
+import TensorVisualization
 
 
 class TermDocumentTensor():
@@ -235,11 +233,8 @@ def main():
     factors = tdt.parafac_decomposition()
     factor_matrices = tdt.create_factor_matrices()
     cos_sim = tdt.generate_cosine_similarity_matrix(factor_matrices[1])
-    #tdt.print_formatted_term_document_tensor()
-    plotly.tools.set_credentials_file(username='MaxPoole', api_key='2ajqCLZjiLNDFxgyLtGn')
-    fig, ax1 = plt.subplots(1, 1)
-    ax1.imshow(cos_sim, cmap='hot')
-    print(tdt.corpus_names)
-    plt.show()
+    visualize = TensorVisualization.TensorVisualization()
+    visualize.generate_heat_map(cos_sim)
+    visualize.show()
 
 main()
