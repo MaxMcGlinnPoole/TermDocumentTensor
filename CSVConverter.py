@@ -87,7 +87,7 @@ def generate_text_term_list(corpus_name, file_name, number_terms=61, **kwargs):
                 if not term.isspace():
 
                     if count < number_terms:
-                        curr.append(term)
+                        curr.append(term.strip())
                     else:
                         break
                     count += 1
