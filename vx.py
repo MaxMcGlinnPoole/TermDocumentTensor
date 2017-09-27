@@ -234,7 +234,7 @@ def main():
     factor_matrices = tdt.create_factor_matrices()
     cos_sim = tdt.generate_cosine_similarity_matrix(factor_matrices[1])
     visualize = TensorVisualization.TensorVisualization()
-    visualize.generate_heat_map(cos_sim)
+    visualize.generate_heat_map(cos_sim, tdt.corpus_names)
     visualize.show()
 
 main()
