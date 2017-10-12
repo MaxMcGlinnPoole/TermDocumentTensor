@@ -6,9 +6,6 @@ Creates a binary document-term tensor (matrix) populated using term freqencies a
 
 * Python 3.0 or higher
 
-#### Used Libraries 
-
-* Python Text Mining Package
 
 ### Installation
 ```
@@ -31,13 +28,6 @@ Creates a binary document-term tensor (matrix) populated using term freqencies a
 7. Push to the branch: `git push`
 8. Submit a [new pull request](https://github.com/MaxMcGlinnPoole/TermDocumentTensor/pull/new)
 
-<<<<<<< HEAD
-=======
-### To-Do
-
-- [ ] Add/Modify dimensionality
-- [ ] Implement a clearer data visualization technique
-- [ ] Add command line functionality
 
 ## Authors 
 Meet our research team
