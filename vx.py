@@ -10,7 +10,7 @@ from plotly.graph_objs import *
 from collections import deque
 import matplotlib.pyplot as plt
 import re
-
+import CSVConverter
 
 class TermDocumentTensor():
     def __init__(self, directory, type="binary"):
@@ -153,21 +153,6 @@ class TermDocumentTensor():
         self.tdt = tdt
         return self.tdt
         
-    def convert_term_document_tensor_to_csv(self):
-        # Converts a tdm to csv
-        try:
-            tdt = self.tdt
-            # if the tdt is 3d or greater
-            if isinstance(self.tdt[0][0], list):
-                tdt = self.tdt[0]
-            with open("test.csv", "w", newline='') as csv_file:
-                writer = csv.writer(csv_file)
-                for entry in tdt:
-                    num_list = map(str, entry)
-                    writer.writerow(num_list)
-        except IndexError:
-            print("You must create the term document tensor")
-            return IndexError
 
     def create_term_document_tensor_text(self):
         mydoclist = []
@@ -229,9 +214,11 @@ class TermDocumentTensor():
 
 
 def main():
+    CSVConverter.generate_term_list_csv("zeus_binaries", "zeus_binaries_terms", transpose=True, numerical_rep=True)
+    CSVConverter.generate_term_list_csv("Folger", "Shakespeare_terms", binary=False)
+    return
     tdt = TermDocumentTensor("zeus_binaries", type="binary")
     tdt.create_binary_term_document_tensor(ngrams=1)
-    tdt.convert_term_document_tensor_to_csv()
     print(tdt.get_estimated_rank())
     factors = tdt.parafac_decomposition()
     factor_matrices = tdt.create_factor_matrices()
