@@ -1,4 +1,3 @@
-import textmining
 import csv
 import os
 from tensorly.tenalg import khatri_rao
@@ -157,7 +156,7 @@ class TermDocumentTensor():
 
     def create_term_document_tensor_text(self):
         mydoclist = []
-        tdm = textmining.TermDocumentMatrix()
+        #tdm = textmining.TermDocumentMatrix()
         files = []
         first_occurences_corpus = {}
         text_names = []
@@ -209,6 +208,8 @@ class TermDocumentTensor():
 
     def parafac_decomposition(self):
         self.factors = parafac(np.array(self.tdt), rank=self.get_estimated_rank())
+        test = np.array(self.tdt)
+        print(test)
         return self.factors
 
 
