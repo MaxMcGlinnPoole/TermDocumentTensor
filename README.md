@@ -4,12 +4,29 @@ Creates a binary document-term tensor (matrix) populated using term freqencies a
 
 ### Requirements
 
-* Python 3.0 or higher
+* Python 3.6
 
 
 ### Installation
+
+Instructions should work for MacOS and Linux systems
+
+First make sure you have installed Python 3.6 and Pip. Then install virtualenv
+
+```
+pip install virtualenv
 ```
 
+Then create and activate your virtualenv
+```
+virtualenv venv
+virtualenv -p python3 venv
+source venv/bin/activate
+```
+
+Next install the project requirements
+```
+pip install -r requirements.txt
 ```
 
 ### Contributing
