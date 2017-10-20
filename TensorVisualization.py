@@ -28,6 +28,12 @@ class TensorVisualization():
         ax1.xaxis.set_major_locator(MaxNLocator(len(axis_labels)))
         ax1.imshow(data, cmap='hot')
 
+        heatmap = ax1.pcolor(data, cmap='hot')
+        plt.title('cosine similarity between documents')
+        cbar = plt.colorbar(heatmap)
+        cbar.ax.get_yaxis().labelpad = 20
+        cbar.ax.set_ylabel('strength of relationship', rotation=270)
+
     def show(self):
         plt.show()
 

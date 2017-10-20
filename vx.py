@@ -214,9 +214,6 @@ class TermDocumentTensor():
 
 
 def main():
-    CSVConverter.generate_term_list_csv("zeus_binaries", "zeus_binaries_terms", transpose=True, numerical_rep=True)
-    CSVConverter.generate_term_list_csv("Folger", "Shakespeare_terms", binary=False)
-    return
     tdt = TermDocumentTensor("zeus_binaries", type="binary")
     tdt.create_binary_term_document_tensor(ngrams=1)
     print(tdt.get_estimated_rank())
