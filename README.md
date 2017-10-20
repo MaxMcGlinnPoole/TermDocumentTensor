@@ -29,6 +29,15 @@ Next install the project requirements
 pip install -r requirements.txt
 ```
 
+Next you need to change the backend of the visualization. 
+```
+vim venv/lib/python3.6/site-packages/tensorly/__init__.py 
+```
+then modify the default_backend variable to be numpy
+```python
+# Set the default backend
+default_backend = 'numpy'
+```
 ### Contributing
 
 1. Make a local clone: 
