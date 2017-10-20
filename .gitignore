@@ -10,3 +10,5 @@ venv/*
 *.iml
 
 *.pyc
+venv2/*
+*.xml___jb_tmp___
