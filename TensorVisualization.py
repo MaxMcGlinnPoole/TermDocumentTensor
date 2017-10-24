@@ -25,8 +25,8 @@ class TensorVisualization():
                            )]
 
         layout = go.Layout(title='cosine similairty between documents',
-                           xaxis = dict(ticks=' ', nticks=12),
-                           yaxis = dict(ticks=' ', nticks=12),
+                           xaxis = dict(ticks=' '),
+                           yaxis = dict(ticks=' '),
                            plot_bgcolor= '#444',
                            paper_bgcolor= '#eee'
                            )
