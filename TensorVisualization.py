@@ -17,17 +17,16 @@ class TensorVisualization():
         :param axis_labels:
         :return:
         """
-        axis_labels_abbreviated = [""]
-        axis_labels_abbreviated.extend([label[:11] for label in axis_labels])
+        axis_labels_abbreviated = [label[:14] for label in axis_labels]
         info = [go.Heatmap(z=data,
                            x=axis_labels_abbreviated,
                            y=axis_labels_abbreviated,
-                           colorscale = 'Viridis',
+                           colorscale = 'Hot',
                            )]
 
         layout = go.Layout(title='cosine similairty between documents',
-                           xaxis = dict(ticks=' '),
-                           yaxis = dict(ticks=' '),
+                           xaxis = dict(ticks=' ', nticks=12),
+                           yaxis = dict(ticks=' ', nticks=12),
                            plot_bgcolor= '#444',
                            paper_bgcolor= '#eee'
                            )
