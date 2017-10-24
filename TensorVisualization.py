@@ -24,7 +24,7 @@ class TensorVisualization():
                            colorscale = 'Hot',
                            )]
 
-        layout = go.Layout(title='cosine similairty between documents',
+        layout = go.Layout(title='Cosine Similarity Between Documents',
                            xaxis = dict(ticks=' '),
                            yaxis = dict(ticks=' '),
                            plot_bgcolor= '#444',
