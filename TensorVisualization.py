@@ -36,12 +36,13 @@ class TensorVisualization():
         adjusted_weights = []
         for entry in factor_matrix:
             adjusted_weight = []
-            adjusted_weight.append(sum(factor_matrix[:len(factor_matrix)//2])/(len(factor_matrix)/2))
-            adjusted_weight.append(sum(factor_matrix[len(factor_matrix)//2:])/(len(factor_matrix)/2))
+            adjusted_weight.append(sum(entry[:len(entry)//2])/(len(entry)/2))
+            adjusted_weight.append(sum(entry[len(entry)//2:])/(len(entry)/2))
             adjusted_weights.append(adjusted_weight)
         kmeans = KMeans(n_clusters=2, random_state=0).fit(factor_matrix)
-        data = [plotly.graph_objs.Scatter(x=adjusted_weights[:, 0],
-                                          y=adjusted_weights[:, 1],
+        thing = [entry[0] for entry in adjusted_weights]
+        data = [plotly.graph_objs.Scatter(x=[entry[0] for entry in adjusted_weights],
+                                          y=[entry[1] for entry in adjusted_weights],
                                           mode='markers',
                                           marker=dict(color=kmeans.labels_)
                                           )
