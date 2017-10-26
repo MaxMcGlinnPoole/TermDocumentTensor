@@ -10,3 +10,7 @@ venv/*
 *.iml
 
 *.pyc
+
+venv2/*
+malware_heatmap.html
+set

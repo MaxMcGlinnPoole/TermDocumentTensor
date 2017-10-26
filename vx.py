@@ -77,7 +77,7 @@ class TermDocumentTensor():
             return I
         else:
             print(I, J, K, "did not have an exact estimation")
-            return min(I*J, I*K, J*K)
+            return 2#return min(I*J, I*K, J*K)
 
     def print_formatted_term_document_tensor(self):
         for matrix in self.tdt:
@@ -221,6 +221,7 @@ def main():
     factor_matrices = tdt.create_factor_matrices()
     cos_sim = tdt.generate_cosine_similarity_matrix(factor_matrices[1])
     visualize = TensorVisualization.TensorVisualization()
+    visualize.k_means_clustering(factors[1])
     visualize.generate_heat_map(cos_sim, tdt.corpus_names)
     visualize.show()
 

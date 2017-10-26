@@ -1,9 +1,8 @@
 import plotly
-import plotly.plotly as py
 import plotly.graph_objs as go
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
-
+import numpy as np
+from sklearn.cluster import KMeans
 
 class TensorVisualization():
     def __init__(self):
@@ -32,6 +31,19 @@ class TensorVisualization():
                            )
         fig = go.Figure(data=info, layout=layout)
         plotly.offline.plot(fig,filename='malware_heatmap.html')
+
+    def k_means_clustering(self, factor_matrix):
+        kmeans = KMeans(n_clusters=2, random_state=0).fit(factor_matrix)
+        data = [plotly.graph_objs.Scatter(x=factor_matrix[:, 0],
+                                          y=factor_matrix[:, 1],
+                                          mode='markers',
+                                          marker=dict(color=kmeans.labels_)
+                                          )
+                ]
+        fig = go.Figure(data=data)
+        plotly.offline.plot(fig, filename='kmeans_cluster.html')
+
+
 
     def show(self):
         plt.show()
