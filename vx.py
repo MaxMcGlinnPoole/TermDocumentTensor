@@ -77,7 +77,7 @@ class TermDocumentTensor():
             return I
         else:
             print(I, J, K, "did not have an exact estimation")
-            return 2#return min(I*J, I*K, J*K)
+            return min(I*J, I*K, J*K)
 
     def print_formatted_term_document_tensor(self):
         for matrix in self.tdt:

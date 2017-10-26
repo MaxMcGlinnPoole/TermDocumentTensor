@@ -33,9 +33,15 @@ class TensorVisualization():
         plotly.offline.plot(fig,filename='malware_heatmap.html')
 
     def k_means_clustering(self, factor_matrix):
+        adjusted_weights = []
+        for entry in factor_matrix:
+            adjusted_weight = []
+            adjusted_weight.append(sum(factor_matrix[:len(factor_matrix)//2])/(len(factor_matrix)/2))
+            adjusted_weight.append(sum(factor_matrix[len(factor_matrix)//2:])/(len(factor_matrix)/2))
+            adjusted_weights.append(adjusted_weight)
         kmeans = KMeans(n_clusters=2, random_state=0).fit(factor_matrix)
-        data = [plotly.graph_objs.Scatter(x=factor_matrix[:, 0],
-                                          y=factor_matrix[:, 1],
+        data = [plotly.graph_objs.Scatter(x=adjusted_weights[:, 0],
+                                          y=adjusted_weights[:, 1],
                                           mode='markers',
                                           marker=dict(color=kmeans.labels_)
                                           )
