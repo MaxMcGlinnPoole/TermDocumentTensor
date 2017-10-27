@@ -8,7 +8,7 @@ from scipy import spatial
 from collections import deque
 import re
 import TensorVisualization
-
+import argparse
 import CSVConverter
 
 
@@ -214,6 +214,38 @@ class TermDocumentTensor():
 
 
 def main():
+    parser = argparse.ArgumentParser()
+
+#Optional arguments
+    parser.add_argument("-d", "--directory", dest="directory_name",
+                    help="Specify a directory to examine")
+     
+    parser.add_argument("-v", "--visualize", dest="visualization_name",
+                    help="Specify how to visualize")
+    
+#Mutually exclusive arguments, in groups.
+#For each group, the first option is true by default,and the rest are false
+    ft_group = parser.add_mutually_exclusive_group(required=True) 
+    ft_group.add_argument("-b","--binary",dest="binary", help="Analyze binary files",action = "store_true",default=True)
+    ft_group.add_argument("-t","--text",dest="text" , help="Analyze text files",action = "store_true",default=False)
+
+
+    decomp_group = parser.add_mutually_exclusive_group(required=True) 
+    decomp_group.add_argument("-parafac",dest="parafac", help="Use a parafac decomposition",action = "store_true",default=True)
+    decomp_group.add_argument("-tucker",dest="tucker", help="Use a tucker decomposition",action = "store_true",default=False)
+
+
+
+    parser.add_argument("-o", "--output", dest="output_option",
+                    help="Specify whether to generate an output file", action= "store_true")
+    
+
+#Sample usage:  python3 vx.py -d myDirectory -v heatmap -b -parafac -o
+    args = parser.parse_args() 
+    
+
+
+
     tdt = TermDocumentTensor("zeus_binaries", type="binary")
     tdt.create_binary_term_document_tensor(ngrams=1)
     print(tdt.get_estimated_rank())
