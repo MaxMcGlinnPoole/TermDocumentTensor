@@ -33,14 +33,15 @@ class TensorVisualization():
         fig = go.Figure(data=info, layout=layout)
         plotly.offline.plot(fig,filename='malware_heatmap.html')
 
-    def k_means_clustering(self, factor_matrix):
+    def k_means_clustering(self, factor_matrix, file_names=[]):
         svd = TruncatedSVD(n_components=2, n_iter=7, random_state=42)
         reduced = svd.fit_transform(factor_matrix)
         kmeans = KMeans(n_clusters=2, random_state=0).fit(factor_matrix)
         data = [plotly.graph_objs.Scatter(x=[entry[0] for entry in reduced],
                                           y=[entry[1] for entry in reduced],
                                           mode='markers',
-                                          marker=dict(color=kmeans.labels_)
+                                          marker=dict(color=kmeans.labels_),
+                                          text=file_names
                                           )
                 ]
         fig = go.Figure(data=data)

@@ -221,7 +221,7 @@ def main():
     factor_matrices = tdt.create_factor_matrices()
     cos_sim = tdt.generate_cosine_similarity_matrix(factor_matrices[1])
     visualize = TensorVisualization.TensorVisualization()
-    visualize.k_means_clustering(factors[1])
+    visualize.k_means_clustering(factors[1], file_names=tdt.corpus_names)
     visualize.generate_heat_map(cos_sim, tdt.corpus_names)
     visualize.show()
 
