@@ -38,6 +38,24 @@ then modify the default_backend variable to be numpy
 # Set the default backend
 default_backend = 'numpy'
 ```
+
+### Usage
+  Currently the program takes several arguments and options:
+   vx.py [-h] [-d DIRECTORY_NAME] [-v VISUALIZATION_NAME] (-b | -t)
+             (-parafac | -tucker) [-o]
+  ```
+  -d or --directory accepts the directory name for the files to be parsed
+  -v or --visualization accepts the type of visualization to be generated
+  -b or -t to parse the files as text or binary files
+  -parafac or -tucker to use either tensor decomposition (more to be added later)
+  -o to generate an output (functionality in progress)
+  ```
+  Sample usage
+  
+  ```
+  python3 vx.py -d myDirectory -v heatmap -b -parafac -o
+  ```
+
 ### Contributing
 
 1. Make a local clone: 
