@@ -213,47 +213,52 @@ class TermDocumentTensor():
         return self.factors
 
 
-def main():
+def parse_arguments():
     parser = argparse.ArgumentParser()
 
-#Optional arguments
-    parser.add_argument("-d", "--directory", dest="directory_name",
-                    help="Specify a directory to examine")
-     
-    parser.add_argument("-v", "--visualize", dest="visualization_name",
-                    help="Specify how to visualize")
-    
-#Mutually exclusive arguments, in groups.
-#For each group, the first option is true by default,and the rest are false
-    ft_group = parser.add_mutually_exclusive_group(required=True) 
-    ft_group.add_argument("-b","--binary",dest="binary", help="Analyze binary files",action = "store_true",default=True)
-    ft_group.add_argument("-t","--text",dest="text" , help="Analyze text files",action = "store_true",default=False)
+    # Optional arguments
+    parser.add_argument("-d", "--directory", dest="directory",
+                        help="Specify a directory to examine")
 
+    parser.add_argument('-v', '--visualize', dest="visualize", nargs='+', help='Specify the ways you would like to visualize the data. '
+                                                             'Options include heatmap and kmeans', required=False)
 
-    decomp_group = parser.add_mutually_exclusive_group(required=True) 
-    decomp_group.add_argument("-parafac",dest="parafac", help="Use a parafac decomposition",action = "store_true",default=True)
-    decomp_group.add_argument("-tucker",dest="tucker", help="Use a tucker decomposition",action = "store_true",default=False)
+    # Mutually exclusive arguments, in groups.
+    # For each group, the first option is true by default,and the rest are false
+    ft_group = parser.add_mutually_exclusive_group(required=True)
+    ft_group.add_argument("-b", "--binary", dest="binary", help="Analyze binary files", action="store_true",
+                          default=True)
+    ft_group.add_argument("-t", "--text", dest="text", help="Analyze text files", action="store_true", default=False)
 
-
+    decomp_group = parser.add_mutually_exclusive_group(required=True)
+    decomp_group.add_argument("-parafac", dest="parafac", help="Use a parafac decomposition", action="store_true",
+                              default=True)
 
     parser.add_argument("-o", "--output", dest="output_option",
-                    help="Specify whether to generate an output file", action= "store_true")
-    
+                        help="Specify whether to generate an output file", action="store_true")
 
-#Sample usage:  python3 vx.py -d myDirectory -v heatmap -b -parafac -o
-    args = parser.parse_args() 
-    
+    # Sample usage:  python3 vx.py -d myDirectory -v heatmap -b -parafac -o
+    args = parser.parse_args()
+    return args
 
+def main():
 
-
-    tdt = TermDocumentTensor("zeus_binaries", type="binary")
+    args = parse_arguments()
+    file_type = "binary" if args.binary else "text"
+    tdt = TermDocumentTensor(args.directory, type=file_type)
     tdt.create_binary_term_document_tensor(ngrams=1)
-    print(tdt.get_estimated_rank())
-    factors = tdt.parafac_decomposition()
+    if args.parafac:
+        factors = tdt.parafac_decomposition()
     factor_matrices = tdt.create_factor_matrices()
-    cos_sim = tdt.generate_cosine_similarity_matrix(factor_matrices[1])
+    cos_sim = None
     visualize = TensorVisualization.TensorVisualization()
-    visualize.generate_heat_map(cos_sim, tdt.corpus_names)
-    visualize.show()
+    print(args.visualize)
+    for i in args.visualize:
+        if i == "heatmap":
+            if cos_sim == None:
+                cos_sim = tdt.generate_cosine_similarity_matrix(factor_matrices[1])
+            visualize.generate_heat_map(cos_sim, tdt.corpus_names)
+            visualize.show()
+
 
 main()
