@@ -222,7 +222,7 @@ def parse_arguments():
 
     parser.add_argument('-v', '--visualize', dest="visualize", nargs='+', help='Specify the ways you would like to visualize the data. '
                                                              'Options include heatmap and kmeans', required=False)
-
+    parser.add_argument("-ngrams", "--ngrams", dest="ngrams", type=int, help="Number of ngrams that will be used in the tensor creation", required=True)
     # Mutually exclusive arguments, in groups.
     # For each group, the first option is true by default,and the rest are false
     ft_group = parser.add_mutually_exclusive_group(required=True)
@@ -246,7 +246,7 @@ def main():
     args = parse_arguments()
     file_type = "binary" if args.binary else "text"
     tdt = TermDocumentTensor(args.directory, type=file_type)
-    tdt.create_binary_term_document_tensor(ngrams=1)
+    tdt.create_binary_term_document_tensor(ngrams=args.ngrams)
     if args.parafac:
         factors = tdt.parafac_decomposition()
     factor_matrices = tdt.create_factor_matrices()
