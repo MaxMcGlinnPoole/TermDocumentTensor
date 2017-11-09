@@ -230,9 +230,9 @@ def parse_arguments():
                           default=True)
     ft_group.add_argument("-t", "--text", dest="text", help="Analyze text files", action="store_true", default=False)
 
-    decomp_group = parser.add_mutually_exclusive_group(required=True)
-    decomp_group.add_argument("-parafac", dest="parafac", help="Use a parafac decomposition", action="store_true",
-                              default=True)
+    decomp_group = parser.add_mutually_exclusive_group()
+    decomp_group.add_argument("-parafac", dest="decom", help="Use a parafac decomposition", action="store_true",
+                              default="parafac")
 
     parser.add_argument("-o", "--output", dest="output_option",
                         help="Specify whether to generate an output file", action="store_true")
@@ -247,7 +247,7 @@ def main():
     file_type = "binary" if args.binary else "text"
     tdt = TermDocumentTensor(args.directory, type=file_type)
     tdt.create_binary_term_document_tensor(ngrams=args.ngrams)
-    if args.parafac:
+    if args.decom == "parafac":
         factors = tdt.parafac_decomposition()
     factor_matrices = tdt.create_factor_matrices()
     cos_sim = None
