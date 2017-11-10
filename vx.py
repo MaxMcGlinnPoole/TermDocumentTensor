@@ -218,17 +218,17 @@ def parse_arguments():
 
     # Optional arguments
     parser.add_argument("-d", "--directory", dest="directory",
-                        help="Specify a directory to examine", required=True)
+                        help="Specify a directory where the samples are stored", required=True)
 
-    parser.add_argument('-heatmap', dest="heatmap", help="Generates a heatmap of the cosine similarity matrix", action="store_true",
+    parser.add_argument('-heatmap', dest="heatmap", help="Generates a HeatMap of the cosine similarity matrix", action="store_true",
                         default=False)
-    parser.add_argument("-kmeans", dest="kmeans", help="Tells the program to perform Kmeans clustering", action="store_true",
+    parser.add_argument("-kmeans", dest="kmeans", help="Tells the program to perform KMeans clustering", action="store_true",
                         default=False)
     parser.add_argument("-comp", dest="components", type=int,  help="Number of components for the Kmeans clustering", default=2)
-    parser.add_argument("-ngrams", "--ngrams", dest="ngrams", type=int, help="Number of ngrams that will be used in the tensor creation", required=True)
+    parser.add_argument("-ngrams", "--ngrams", dest="ngrams", type=int, help="Number of n-grams that will be used in the tensor creation", required=True)
     # Mutually exclusive arguments, in groups.
     # For each group, the first option is true by default,and the rest are false
-    ft_group = parser.add_mutually_exclusive_group(required=True)
+    ft_group = parser.add_mutually_exclusive_group()
     ft_group.add_argument("-b", "--binary", dest="binary", help="Analyze binary files", action="store_true",
                           default=True)
     ft_group.add_argument("-t", "--text", dest="text", help="Analyze text files", action="store_true", default=False)
