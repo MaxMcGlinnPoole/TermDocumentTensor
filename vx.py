@@ -218,10 +218,13 @@ def parse_arguments():
 
     # Optional arguments
     parser.add_argument("-d", "--directory", dest="directory",
-                        help="Specify a directory to examine")
+                        help="Specify a directory to examine", required=True)
 
-    parser.add_argument('-v', '--visualize', dest="visualize", nargs='+', help='Specify the ways you would like to visualize the data. '
-                                                             'Options include heatmap and kmeans', required=False)
+    parser.add_argument('-heatmap', dest="heatmap", help="Generates a heatmap of the cosine similarity matrix", action="store_true",
+                        default=False)
+    parser.add_argument("-kmeans", dest="kmeans", help="Tells the program to perform Kmeans clustering", action="store_true",
+                        default=False)
+    parser.add_argument("-comp", dest="components", type=int,  help="Number of components for the Kmeans clustering", default=2)
     parser.add_argument("-ngrams", "--ngrams", dest="ngrams", type=int, help="Number of ngrams that will be used in the tensor creation", required=True)
     # Mutually exclusive arguments, in groups.
     # For each group, the first option is true by default,and the rest are false
@@ -248,16 +251,14 @@ def main():
     tdt.create_binary_term_document_tensor(ngrams=args.ngrams)
     if args.decom == "parafac":
         factors = tdt.parafac_decomposition()
-    factor_matrices = tdt.create_factor_matrices()
     cos_sim = None
     visualize = TensorVisualization.TensorVisualization()
-    print(args.visualize)
-    for i in args.visualize:
-        if i == "heatmap":
-            if cos_sim == None:
-                cos_sim = tdt.generate_cosine_similarity_matrix(factor_matrices[1])
-            visualize.generate_heat_map(cos_sim, tdt.corpus_names)
-            visualize.show()
+    if args.heatmap:
+        cos_sim = tdt.generate_cosine_similarity_matrix(factors[1])
+        visualize.generate_heat_map(cos_sim, tdt.corpus_names)
+        visualize.show()
+    if args.kmeans:
+        visualize.k_means_clustering(factors[1], tdt.corpus_names, clusters=args.components)
 
 
 main()
