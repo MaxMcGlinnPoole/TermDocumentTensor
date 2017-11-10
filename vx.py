@@ -256,7 +256,6 @@ def main():
     if args.heatmap:
         cos_sim = tdt.generate_cosine_similarity_matrix(factors[1])
         visualize.generate_heat_map(cos_sim, tdt.corpus_names)
-        visualize.show()
     if args.kmeans:
         visualize.k_means_clustering(factors[1], tdt.corpus_names, clusters=args.components)
 

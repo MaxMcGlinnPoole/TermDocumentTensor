@@ -47,8 +47,3 @@ class TensorVisualization():
                 ]
         fig = go.Figure(data=data)
         plotly.offline.plot(fig, filename='kmeans_cluster.html')
-
-    def show(self):
-        plt.show()
-
-
