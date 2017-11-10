@@ -1,9 +1,10 @@
 import plotly
 import plotly.graph_objs as go
 import matplotlib.pyplot as plt
-import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.decomposition import TruncatedSVD
+
+
 
 class TensorVisualization():
     def __init__(self):
@@ -46,8 +47,6 @@ class TensorVisualization():
                 ]
         fig = go.Figure(data=data)
         plotly.offline.plot(fig, filename='kmeans_cluster.html')
-
-
 
     def show(self):
         plt.show()
