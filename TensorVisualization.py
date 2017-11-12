@@ -1,8 +1,9 @@
 import plotly
-import plotly.plotly as py
 import plotly.graph_objs as go
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
+from sklearn.cluster import KMeans
+from sklearn.decomposition import TruncatedSVD
+
 
 
 class TensorVisualization():
@@ -33,7 +34,16 @@ class TensorVisualization():
         fig = go.Figure(data=info, layout=layout)
         plotly.offline.plot(fig,filename='malware_heatmap.html')
 
-    def show(self):
-        plt.show()
-
-
+    def k_means_clustering(self, factor_matrix, file_names=[], clusters=2):
+        svd = TruncatedSVD(n_components=clusters, n_iter=7, random_state=42)
+        reduced = svd.fit_transform(factor_matrix)
+        kmeans = KMeans(n_clusters=clusters, random_state=0).fit(factor_matrix)
+        data = [plotly.graph_objs.Scatter(x=[entry[0] for entry in reduced],
+                                          y=[entry[1] for entry in reduced],
+                                          mode='markers',
+                                          marker=dict(color=kmeans.labels_),
+                                          text=file_names
+                                          )
+                ]
+        fig = go.Figure(data=data)
+        plotly.offline.plot(fig, filename='kmeans_cluster.html')

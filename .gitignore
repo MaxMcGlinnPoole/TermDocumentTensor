@@ -10,5 +10,10 @@ venv/*
 *.iml
 
 *.pyc
+
+venv2/*
+malware_heatmap.html
+set
 venv2/*
 *.xml___jb_tmp___
+
