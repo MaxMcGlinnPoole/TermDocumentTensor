@@ -51,6 +51,9 @@ class TermDocumentTensor():
         # At the moment the rank returned by this function is normally too high for either
         # my machine or the tensorly library to handle, therefore I have made it just return 1 for right now
 
+        # If given a matrix, return matrix rank
+        if not type(self.tdt[0][0]) == list:
+            return np.linalg.matrix_rank(self.tdt)
         I = len(self.tdt[0])
         J = len(self.tdt[0][0])
         K = len(self.tdt)
@@ -89,7 +92,7 @@ class TermDocumentTensor():
         if self.type == "binary":
             return self.create_binary_term_document_tensor(**kwargs)
         else:
-            return self.create_text_corpus(**kwargs)
+            return self.create_term_document_tensor_text()
 
     def create_binary_term_document_tensor(self, **kwargs):
         doc_content = []
@@ -155,56 +158,27 @@ class TermDocumentTensor():
         
 
     def create_term_document_tensor_text(self):
+        '''
+        Currently only creates a term document matrix
+        :return:
+        '''
+        print("term document")
         mydoclist = []
-        #tdm = textmining.TermDocumentMatrix()
-        files = []
-        first_occurences_corpus = {}
         text_names = []
         number_files = 0
+
+        vectorizer = CountVectorizer(min_df=1)
         for file in os.listdir(self.directory):
             number_files += 1
-            first_occurences = {}
-            words = 0
+            content = []
             with open(self.directory + "/" + file, "r") as shake:
-                files.append(file)
-                lines_100 = ""
-                while True:
-                    my_line = shake.readline()
-                    if not my_line:
-                        break
-                    re.sub(r'\W+', '', my_line)
-                    for word in my_line.split():
-                        words += 1
-                        if word not in first_occurences:
-                            first_occurences[word] = words
-                    lines_100 += my_line
-            first_occurences_corpus[file] = first_occurences
-            tdm.add_doc(lines_100)
+                content.append(shake.read().replace('\n', ''))
             mydoclist.append(file)
             text_names.append(file)
-        tdm = list(tdm.rows(cutoff=1))
-        tdt = [0, 0]
-        tdm_first_occurences = []
-        # tdm_first_occurences[0] = tdm[0]
-        # Create a first occurences matrix that corresponds with the tdm
-        for j in range(len(text_names)):
-            item = text_names[j]
-            this_tdm = []
-            for i in range(0, len(tdm[0])):
-                word = tdm[0][i]
-                try:
-                    this_tdm.append(first_occurences_corpus[item][word])
-                except:
-                    this_tdm.append(0)
-            # print(this_tdm)
-            tdm_first_occurences.append(this_tdm)
-        self.vocab = tdm.pop(0)
-        self.corpus_names = mydoclist
-        tdt[0] = tdm
-        tdt[1] = tdm_first_occurences
-        tdt = np.asanyarray(tdt)
-        self.tdt = tdt
-        return tdt
+        tdm = vectorizer.fit_transform(content).toarray()  # X is Term-document matrix
+
+        self.tdt = tdm
+        return tdm
 
     def parafac_decomposition(self):
         self.factors = parafac(np.array(self.tdt), rank=self.get_estimated_rank())
@@ -246,9 +220,10 @@ def parse_arguments():
 
 def main():
     args = parse_arguments()
-    file_type = "binary" if args.binary else "text"
+    file_type = "text" if args.text else "binary"
+    print(file_type)
     tdt = TermDocumentTensor(args.directory, type=file_type)
-    tdt.create_binary_term_document_tensor(ngrams=args.ngrams)
+    tdt.create_term_document_tensor(ngrams=args.ngrams)
     if args.decom == "parafac":
         factors = tdt.parafac_decomposition()
     cos_sim = None
