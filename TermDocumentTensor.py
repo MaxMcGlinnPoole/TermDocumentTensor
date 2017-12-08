@@ -7,6 +7,7 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from scipy import spatial
 from collections import deque
 import re
+import scipy
 import CSVConverter
 
 class TermDocumentTensor():
@@ -20,6 +21,7 @@ class TermDocumentTensor():
         self.factor_matrices = []
         # These are the output of our tensor decomposition.
         self.factors = []
+        self.tdt_sparse = None
 
     def create_factor_matrices(self):
         tdm_1 = np.matmul(self.factors[0], np.transpose(khatri_rao([self.factors[2], self.factors[1]])))
@@ -149,6 +151,9 @@ class TermDocumentTensor():
 
         tdt = [tdm, tdm_first_occurences]
         self.tdt = tdt
+        tdm_sparse = scipy.sparse.csr_matrix(tdm)
+        tdm_first_occurences_sparse = scipy.sparse.csr_matrix(tdm_first_occurences)
+        self.tdt_sparse = [tdm_sparse, tdm_first_occurences_sparse]
         return self.tdt
 
     def create_term_document_tensor_text(self):
@@ -200,6 +205,7 @@ class TermDocumentTensor():
         tdt[0] = tdm
         tdt[1] = tdm_first_occurences
         tdt = np.asanyarray(tdt)
+
         self.tdt = tdt
         return tdt
 
