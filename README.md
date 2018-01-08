@@ -4,16 +4,59 @@ Creates a binary document-term tensor (matrix) populated using term freqencies a
 
 ### Requirements
 
-* Python 3.0 or higher
+* Python 3.6
 
-#### Used Libraries 
-
-* Python Text Mining Package
 
 ### Installation
-```
+
+Instructions should work for MacOS and Linux systems
+
+First make sure you have installed Python 3.6 and Pip. Then install virtualenv
 
 ```
+pip install virtualenv
+```
+
+Then create and activate your virtualenv
+```
+virtualenv venv
+virtualenv -p python3 venv
+source venv/bin/activate
+```
+
+Next install the project requirements
+```
+pip install -r requirements.txt
+```
+
+Next you need to change the backend of the visualization. 
+```
+vim venv/lib/python3.6/site-packages/tensorly/__init__.py 
+```
+then modify the default_backend variable to be numpy
+```python
+# Set the default backend
+default_backend = 'numpy'
+```
+
+### Usage
+  Currently the program takes several arguments and options:
+   vx.py [-h] [-d DIRECTORY_NAME] [CLUSTERING OPTIONS] (-b | -t) (-ngrams)
+             
+  ```
+  -d or --directory accepts the directory name for the files to be parsed
+  -b or -t to parse the files as text or binary files
+  -parafac or -tucker to use either tensor decomposition (more to be added later)
+  -o to generate an output (functionality in progress)
+  -ngrams ngrams of the term document tensor
+  -heatmap generate a heatmap of the cosine similarity matrix
+  -kmeans do kmeans clustering on one of the factor matrices
+  ```
+  Sample usage
+  
+  ```
+  python3 vx.py -d myDirectory -heatmap -b 
+  ```
 
 ### Contributing
 
@@ -31,13 +74,6 @@ Creates a binary document-term tensor (matrix) populated using term freqencies a
 7. Push to the branch: `git push`
 8. Submit a [new pull request](https://github.com/MaxMcGlinnPoole/TermDocumentTensor/pull/new)
 
-<<<<<<< HEAD
-=======
-### To-Do
-
-- [ ] Add/Modify dimensionality
-- [ ] Implement a clearer data visualization technique
-- [ ] Add command line functionality
 
 ## Authors 
 Meet our research team
