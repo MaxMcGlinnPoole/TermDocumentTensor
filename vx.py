@@ -43,6 +43,7 @@ def main():
     file_type = "binary" if args.binary else "text"
     tdt = TermDocumentTensor.TermDocumentTensor(args.directory, type=file_type)
     tdt.create_binary_term_document_tensor(ngrams=args.ngrams)
+
     if args.decom == "parafac":
         factors = tdt.parafac_decomposition()
     cos_sim = None
