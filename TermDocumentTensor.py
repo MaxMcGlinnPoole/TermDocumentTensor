@@ -134,11 +134,10 @@ class TermDocumentTensor():
         for i in range(len(doc_names)):
             row = x1[i]
             tdm.append(row)
-        svd = TruncatedSVD(n_components=300, n_iter=7, random_state=42)
+        svd = TruncatedSVD(n_components=100, n_iter=7, random_state=42)
         reduced_tdm = svd.fit_transform(tdm)
         tdm_first_occurences = []
         self.corpus_names = doc_names
-        # tdm_first_occurences[0] = tdm[0]
         # Create a first occurences matrix that corresponds with the tdm
         for j in range(len(doc_names)):
             item = doc_names[j]
@@ -151,12 +150,13 @@ class TermDocumentTensor():
                     this_tdm.append(0)
             # print(this_tdm)
             tdm_first_occurences.append(this_tdm)
-        svd = TruncatedSVD(n_components=300, n_iter=7, random_state=42)
         reduced_tdm_first_occurences = svd.fit_transform(tdm_first_occurences)
+        del tdm_first_occurences
+        del tdm
         tdt = [reduced_tdm, reduced_tdm_first_occurences]
         self.tdt = tdt
-        tdm_sparse = scipy.sparse.csr_matrix(tdm)
-        tdm_first_occurences_sparse = scipy.sparse.csr_matrix(tdm_first_occurences)
+        #tdm_sparse = scipy.sparse.csr_matrix(tdm)
+        #tdm_first_occurences_sparse = scipy.sparse.csr_matrix(tdm_first_occurences)
         return self.tdt
 
     def create_term_document_tensor_text(self):
@@ -208,17 +208,12 @@ class TermDocumentTensor():
         tdt[0] = tdm
         tdt[1] = tdm_first_occurences
         tdt = np.asanyarray(tdt)
-
+        del tdm
+        del tdm_first_occurences
         self.tdt = tdt
         return tdt
 
     def parafac_decomposition(self):
-        '''test_tensor = SparseTensor(indices=[[0,0,0], [1,1,2], [2,3,3]], values=(1,2,3), dense_shape=[3,3,3])
-        factors = [SparseTensor(indices=[[0,1], [1,0]], values=(1,1), dense_shape=[3,2]),
-                   SparseTensor(indices=[[0,1], [1,0]], values=(2,2), dense_shape=[3,2]),
-                   SparseTensor(indices=[[0,1], [1,0]], values=(3,3), dense_shape=[3,2])]
-        for i in range(3):
-            factors.append(rand())'''
         self.factors = parafac(np.array(self.tdt), rank=self.get_estimated_rank())
         return self.factors
 

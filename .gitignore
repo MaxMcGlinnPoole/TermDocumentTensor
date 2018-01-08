@@ -17,3 +17,5 @@ set
 venv2/*
 *.xml___jb_tmp___
 
+zeus_binaries/*
+
