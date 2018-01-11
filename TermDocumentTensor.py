@@ -1,14 +1,11 @@
-import csv
 import os
 from tensorly.tenalg import khatri_rao
 from tensorly.decomposition import parafac
 import numpy as np
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from scipy import spatial
 from collections import deque
 import re
-import scipy
-from tensorflow import SparseTensor
 from sklearn.decomposition import TruncatedSVD
 
 class TermDocumentTensor():
