@@ -1,17 +1,17 @@
-import os
 from tensorly.tenalg import khatri_rao
+from scipy import spatial
+from collections import deque
+import os
 from tensorly.decomposition import parafac
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
-from scipy import spatial
-from collections import deque
-import re
 from sklearn.decomposition import TruncatedSVD
+import _pickle as pickle
 
 class TermDocumentTensor():
     def __init__(self, directory, type="binary"):
         self.vocab = []
-        self.tdt = []
+        self.tensor = []
         self.corpus_names = []
         self.directory = directory
         self.type = type
@@ -19,7 +19,6 @@ class TermDocumentTensor():
         self.factor_matrices = []
         # These are the output of our tensor decomposition.
         self.factors = []
-        self.tdt_sparse = None
 
     def create_factor_matrices(self):
         tdm_1 = np.matmul(self.factors[0], np.transpose(khatri_rao([self.factors[2], self.factors[1]])))
@@ -48,9 +47,9 @@ class TermDocumentTensor():
         # At the moment the rank returned by this function is normally too high for either
         # my machine or the tensorly library to handle, therefore I have made it just return 1 for right now
 
-        I = len(self.tdt[0])
-        J = len(self.tdt[0][0])
-        K = len(self.tdt)
+        I = len(self.tensor[0])
+        J = len(self.tensor[0][0])
+        K = len(self.tensor)
 
         if I == 1 or J == 1 or K == 1:
             return 1
@@ -77,7 +76,7 @@ class TermDocumentTensor():
             return min(I * J, I * K, J * K)
 
     def print_formatted_term_document_tensor(self):
-        for matrix in self.tdt:
+        for matrix in self.tensor:
             print(self.vocab)
             for i in range(len(matrix)):
                 print(self.corpus_names[i], matrix[i])
@@ -151,66 +150,57 @@ class TermDocumentTensor():
         del tdm_first_occurences
         del tdm
         tdt = [reduced_tdm, reduced_tdm_first_occurences]
-        self.tdt = tdt
+        self.tensor = tdt
         #tdm_sparse = scipy.sparse.csr_matrix(tdm)
         #tdm_first_occurences_sparse = scipy.sparse.csr_matrix(tdm_first_occurences)
-        return self.tdt
+        return self.tensor
 
     def create_term_document_tensor_text(self):
-        mydoclist = []
-        # tdm = textmining.TermDocumentMatrix()
-        files = []
-        first_occurences_corpus = {}
-        text_names = []
-        number_files = 0
-        for file in os.listdir(self.directory):
-            number_files += 1
-            first_occurences = {}
-            words = 0
-            with open(self.directory + "/" + file, "r") as shake:
-                files.append(file)
-                lines_100 = ""
-                while True:
-                    my_line = shake.readline()
-                    if not my_line:
-                        break
-                    re.sub(r'\W+', '', my_line)
-                    for word in my_line.split():
-                        words += 1
-                        if word not in first_occurences:
-                            first_occurences[word] = words
-                    lines_100 += my_line
-            first_occurences_corpus[file] = first_occurences
-            tdm.add_doc(lines_100)
-            mydoclist.append(file)
-            text_names.append(file)
-        tdm = list(tdm.rows(cutoff=1))
-        tdt = [0, 0]
-        tdm_first_occurences = []
-        # tdm_first_occurences[0] = tdm[0]
-        # Create a first occurences matrix that corresponds with the tdm
-        for j in range(len(text_names)):
-            item = text_names[j]
-            this_tdm = []
-            for i in range(0, len(tdm[0])):
-                word = tdm[0][i]
-                try:
-                    this_tdm.append(first_occurences_corpus[item][word])
-                except:
-                    this_tdm.append(0)
-            # print(this_tdm)
-            tdm_first_occurences.append(this_tdm)
-        self.vocab = tdm.pop(0)
-        self.corpus_names = mydoclist
-        tdt[0] = tdm
-        tdt[1] = tdm_first_occurences
-        tdt = np.asanyarray(tdt)
-        del tdm
-        del tdm_first_occurences
-        self.tdt = tdt
-        return tdt
+        self.tensor = None
+        cutoffs = []
+        doc_content = []
+        pos = 0
+        max_matrix_height = 0
+        times = 0
+        # file = open('php_data.pkl', 'r')
+        # self.tensor = pickle.load(file)
+        print(self.tensor)
+
+        for file_name in os.listdir(self.directory):
+            cutoffs.append(pos)
+            times += 1
+            with open(self.directory + "/" + file_name, "r", encoding='latin-1') as file:
+                for line in file:
+                    if len(line) > 2:
+                        pos += 1
+                        doc_content.append(line)
+                if max_matrix_height < pos - cutoffs[-1]:
+                    max_matrix_height = pos - cutoffs[-1]
+        cutoffs.append(pos)
+        vectorizer = TfidfVectorizer(use_idf=False, analyzer="word")
+
+        x1 = vectorizer.fit_transform(doc_content)
+        matrix_length = len(vectorizer.get_feature_names())
+        svd = TruncatedSVD(n_components=100, n_iter=7, random_state=42)
+        for i in range(len(cutoffs) - 1):
+            temp = x1[cutoffs[i]:cutoffs[i + 1], :]
+
+            temp = temp.todense()
+            matrix = np.zeros((max_matrix_height, matrix_length))
+            matrix[:temp.shape[0], :temp.shape[1]] = temp
+            # reduce dimensionality of matrix slices to reduce memory overhead
+            matrix = svd.fit_transform(matrix)
+            if self.tensor is None:
+                self.tensor = matrix
+            else:
+                self.tensor = np.append(self.tensor, matrix, axis=0)
+
+        test = parafac(self.tensor, rank=2)
+        pickle.dump(self.tensor, open("php_data.pkl", "w"))
+        print(test)
+        return self.tensor
 
     def parafac_decomposition(self):
-        self.factors = parafac(np.array(self.tdt), rank=self.get_estimated_rank())
+        self.factors = parafac(np.array(self.tensor), rank=self.get_estimated_rank())
         return self.factors
 

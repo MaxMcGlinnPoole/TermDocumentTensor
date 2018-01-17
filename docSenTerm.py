@@ -3,7 +3,7 @@ from tensorly.decomposition import parafac
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
-
+import _pickle as pickle
 def main():
     tds = None
     cutoffs = []
@@ -11,6 +11,10 @@ def main():
     pos = 0
     max_matrix_height = 0
     times = 0
+    #file = open('php_data.pkl', 'r')
+    #tds = pickle.load(file)
+    print(tds)
+
     for file_name in os.listdir("php"):
         cutoffs.append(pos)
         times += 1
@@ -41,6 +45,6 @@ def main():
             tds = np.append(tds, matrix, axis=0)
 
     test = parafac(tds, rank=2)
-    np.savetxt("php_data.txt", tds)
+    pickle.dump(tds, open("php_data.pkl", "w"))
     print(test)
 main()
