@@ -11,8 +11,8 @@ def main():
     pos = 0
     max_matrix_height = 0
     times = 0
-    #file = open('php_data.pkl', 'r')
-    #tds = pickle.load(file)
+    file = open('php_data1503-100-5.pkl', 'rb')
+    tds = pickle.load(file)
     print(tds)
 
     for file_name in os.listdir("php"):
@@ -25,6 +25,8 @@ def main():
                     doc_content.append(line)
             if max_matrix_height < pos - cutoffs[-1]:
                 max_matrix_height = pos - cutoffs[-1]
+        if times >= 5:
+            break
     cutoffs.append(pos)
     vectorizer = TfidfVectorizer(use_idf=False, analyzer="word")
 
@@ -42,9 +44,10 @@ def main():
         if tds is None:
             tds = matrix
         else:
-            tds = np.append(tds, matrix, axis=0)
+            tds = np.dstack((tds, matrix))
 
     test = parafac(tds, rank=2)
-    pickle.dump(tds, open("php_data.pkl", "w"))
+    file = "php_data" + '-'.join(map(str, tds.shape)) + ".pkl"
+    pickle.dump(tds, open(file, "wb"))
     print(test)
 main()

@@ -8,6 +8,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 import _pickle as pickle
 
+
 class TermDocumentTensor():
     def __init__(self, directory, type="binary"):
         self.vocab = []
@@ -19,6 +20,7 @@ class TermDocumentTensor():
         self.factor_matrices = []
         # These are the output of our tensor decomposition.
         self.factors = []
+        self.file_name = None
 
     def create_factor_matrices(self):
         tdm_1 = np.matmul(self.factors[0], np.transpose(khatri_rao([self.factors[2], self.factors[1]])))
@@ -85,7 +87,7 @@ class TermDocumentTensor():
         if self.type == "binary":
             return self.create_binary_term_document_tensor(**kwargs)
         else:
-            return self.create_text_corpus(**kwargs)
+            return self.create_term_document_tensor_text(**kwargs)
 
     def create_binary_term_document_tensor(self, **kwargs):
         doc_content = []
@@ -155,49 +157,50 @@ class TermDocumentTensor():
         #tdm_first_occurences_sparse = scipy.sparse.csr_matrix(tdm_first_occurences)
         return self.tensor
 
-    def create_term_document_tensor_text(self):
+    def create_term_document_tensor_text(self, **kwargs):
+        """
+        Creates term-sentence-document tensor out of files in directory
+        
+        :return: 3-D dense numpy array, self.tensor
+        """
+        if self.file_name is not None:
+            file = open(self.file_name, 'rb')
+            self.tensor = pickle.load(file)
         self.tensor = None
-        cutoffs = []
+        vectorizer = TfidfVectorizer(use_idf=False, analyzer="word")
+        document_cutoff_positions = []
         doc_content = []
         pos = 0
         max_matrix_height = 0
-        times = 0
-        # file = open('php_data.pkl', 'r')
-        # self.tensor = pickle.load(file)
-        print(self.tensor)
+        svd = TruncatedSVD(n_components=100, n_iter=7, random_state=42)
 
         for file_name in os.listdir(self.directory):
-            cutoffs.append(pos)
-            times += 1
+            document_cutoff_positions.append(pos)
             with open(self.directory + "/" + file_name, "r", encoding='latin-1') as file:
                 for line in file:
                     if len(line) > 2:
                         pos += 1
                         doc_content.append(line)
-                if max_matrix_height < pos - cutoffs[-1]:
-                    max_matrix_height = pos - cutoffs[-1]
-        cutoffs.append(pos)
-        vectorizer = TfidfVectorizer(use_idf=False, analyzer="word")
+                if max_matrix_height < pos - document_cutoff_positions[-1]:
+                    max_matrix_height = pos - document_cutoff_positions[-1]
+        document_cutoff_positions.append(pos)
 
         x1 = vectorizer.fit_transform(doc_content)
         matrix_length = len(vectorizer.get_feature_names())
-        svd = TruncatedSVD(n_components=100, n_iter=7, random_state=42)
-        for i in range(len(cutoffs) - 1):
-            temp = x1[cutoffs[i]:cutoffs[i + 1], :]
 
+        for i in range(len(document_cutoff_positions) - 1):
+            temp = x1[document_cutoff_positions[i]:document_cutoff_positions[i + 1], :]
             temp = temp.todense()
-            matrix = np.zeros((max_matrix_height, matrix_length))
-            matrix[:temp.shape[0], :temp.shape[1]] = temp
-            # reduce dimensionality of matrix slices to reduce memory overhead
-            matrix = svd.fit_transform(matrix)
+            term_sentence_matrix = np.zeros((max_matrix_height, matrix_length))
+            term_sentence_matrix[:temp.shape[0], :temp.shape[1]] = temp
+            term_sentence_matrix = svd.fit_transform(term_sentence_matrix)
             if self.tensor is None:
-                self.tensor = matrix
+                self.tensor = term_sentence_matrix
             else:
-                self.tensor = np.append(self.tensor, matrix, axis=0)
+                self.tensor = np.dstack((self.tensor, term_sentence_matrix))
 
-        test = parafac(self.tensor, rank=2)
-        pickle.dump(self.tensor, open("php_data.pkl", "w"))
-        print(test)
+        self.file_name = self.directory + ".pkl"
+        pickle.dump(self.tensor, open(self.file_name, "wb"))
         return self.tensor
 
     def parafac_decomposition(self):
