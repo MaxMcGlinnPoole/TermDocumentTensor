@@ -10,7 +10,7 @@ import _pickle as pickle
 
 
 class TermDocumentTensor():
-    def __init__(self, directory, type="binary"):
+    def __init__(self, directory, type="binary", file_name=None):
         self.vocab = []
         self.tensor = []
         self.corpus_names = []
@@ -20,7 +20,7 @@ class TermDocumentTensor():
         self.factor_matrices = []
         # These are the output of our tensor decomposition.
         self.factors = []
-        self.file_name = None
+        self.file_name = file_name
 
     def create_factor_matrices(self):
         tdm_1 = np.matmul(self.factors[0], np.transpose(khatri_rao([self.factors[2], self.factors[1]])))
@@ -163,9 +163,7 @@ class TermDocumentTensor():
         
         :return: 3-D dense numpy array, self.tensor
         """
-        if self.file_name is not None:
-            file = open(self.file_name, 'rb')
-            self.tensor = pickle.load(file)
+
         self.tensor = None
         vectorizer = TfidfVectorizer(use_idf=False, analyzer="word")
         document_cutoff_positions = []
@@ -174,6 +172,10 @@ class TermDocumentTensor():
         max_matrix_height = 0
         svd = TruncatedSVD(n_components=100, n_iter=7, random_state=42)
         self.corpus_names = os.listdir(self.directory)
+        if self.file_name is not None:
+            file = open(self.file_name, 'rb')
+            self.tensor = pickle.load(file)
+            return self.tensor
         for file_name in self.corpus_names:
             document_cutoff_positions.append(pos)
             with open(self.directory + "/" + file_name, "r", encoding='latin-1') as file:
