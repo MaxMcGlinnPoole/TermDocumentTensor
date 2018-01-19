@@ -20,3 +20,12 @@ venv2/*
 zeus_binaries/*
 
 php/*
+
+JSP/*
+
+JSP_and_PHP/*
+
+ENV_DIR/*
+*.html
+
+*.pkl
