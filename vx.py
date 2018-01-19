@@ -18,6 +18,12 @@ def parse_arguments():
     parser.add_argument("-kmeans", dest="kmeans", help="Tells the program to perform KMeans clustering",
                         action="store_true",
                         default=False)
+    parser.add_argument("-axis", dest="axis", help="The axis on which the decomposition should be modelled. "
+                                                   "This number corresponds with the same entry factor matrix"
+                                                   "from the decomposition. By default this is 1", default=1, type=int)
+    parser.add_argument("-lines", dest="lines", help="The max number of lines that should be read from each file to "
+                                                     "make the decomposition. By default this is 100",
+                        default=100, type=int)
     parser.add_argument("-comp", dest="components", type=int, help="Number of components for the Kmeans clustering",
                         default=2)
     parser.add_argument("-ngrams", "--ngrams", dest="ngrams", type=int,
@@ -44,19 +50,17 @@ def main():
     args = parse_arguments()
     file_type = "binary" if args.binary else "text"
     tdt = TermDocumentTensor.TermDocumentTensor(args.directory, type=file_type, file_name=args.file)
-    tdt.create_term_document_tensor(ngrams=args.ngrams)
+    tdt.create_term_document_tensor(ngrams=args.ngrams, lines=args.lines)
 
     if args.decom == "parafac":
         factors = tdt.parafac_decomposition()
-    cos_sim = None
+
     visualize = TensorVisualization.TensorVisualization()
     if args.heatmap:
-        cos_sim = tdt.generate_cosine_similarity_matrix(factors[1])
+        cos_sim = tdt.generate_cosine_similarity_matrix(factors[args.axis])
         visualize.generate_heat_map(cos_sim, tdt.corpus_names)
     if args.kmeans:
-        # HACK SOLUTION, DELETE
-        factor_number = 1 if args.binary else 2
-        visualize.k_means_clustering(factors[factor_number], tdt.corpus_names, clusters=args.components)
+        visualize.k_means_clustering(factors[args.axis], tdt.corpus_names, clusters=args.components)
 
 
 main()

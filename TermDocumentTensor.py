@@ -171,6 +171,7 @@ class TermDocumentTensor():
         pos = 0
         max_matrix_height = 0
         svd = TruncatedSVD(n_components=100, n_iter=7, random_state=42)
+        max_sentences = kwargs["lines"]
         self.corpus_names = os.listdir(self.directory)
         if self.file_name is not None:
             file = open(self.file_name, 'rb')
@@ -183,7 +184,7 @@ class TermDocumentTensor():
                     if len(line) > 2:
                         pos += 1
                         doc_content.append(line)
-                    if pos - document_cutoff_positions[-1] >= 100:
+                    if pos - document_cutoff_positions[-1] >= max_sentences:
                         break
                 if max_matrix_height < pos - document_cutoff_positions[-1]:
                     max_matrix_height = pos - document_cutoff_positions[-1]
