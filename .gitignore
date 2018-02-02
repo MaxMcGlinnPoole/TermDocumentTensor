@@ -29,3 +29,5 @@ ENV_DIR/*
 *.html
 
 *.pkl
+
+shakespeare_duck/*

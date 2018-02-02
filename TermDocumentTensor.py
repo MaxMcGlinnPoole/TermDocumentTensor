@@ -7,6 +7,8 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 import _pickle as pickle
+import tensorflow as tf
+from ktensor import KruskalTensor
 
 
 class TermDocumentTensor():
@@ -179,7 +181,7 @@ class TermDocumentTensor():
             return self.tensor
         for file_name in self.corpus_names:
             document_cutoff_positions.append(pos)
-            with open(self.directory + "/" + file_name, "r", encoding='latin-1') as file:
+            with open(self.directory + "/" + file_name, "r", errors="ignore") as file:
                 for line in file:
                     if len(line) > 2:
                         pos += 1
@@ -199,17 +201,25 @@ class TermDocumentTensor():
             temp = temp.todense()
             term_sentence_matrix = np.zeros((max_matrix_height, matrix_length))
             term_sentence_matrix[:temp.shape[0], :temp.shape[1]] = temp
-            term_sentence_matrix = svd.fit_transform(term_sentence_matrix)
+            #term_sentence_matrix = svd.fit_transform(term_sentence_matrix)
             if self.tensor is None:
                 self.tensor = term_sentence_matrix
             else:
                 self.tensor = np.dstack((self.tensor, term_sentence_matrix))
 
         self.file_name = self.directory + ".pkl"
+        print(self.tensor.shape)
         pickle.dump(self.tensor, open(self.file_name, "wb"))
         return self.tensor
 
     def parafac_decomposition(self):
-        self.factors = parafac(np.array(self.tensor), rank=self.get_estimated_rank())
+        decompose = KruskalTensor(self.tensor.shape, rank=3, regularize=1e-6, init='nvecs', X_data=self.tensor)
+        self.factors = decompose.U
+        with tf.Session() as sess:
+            for i in range(len(self.factors)):
+                sess.run(self.factors[i].initializer)
+                self.factors[i] = self.factors[i].eval()
+        #test = self.factors[0].eval(tf.Session())
+        #self.factors = parafac(np.array(self.tensor), rank=self.get_estimated_rank())
         return self.factors
 
