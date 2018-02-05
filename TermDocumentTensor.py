@@ -209,7 +209,10 @@ class TermDocumentTensor():
 
         self.file_name = self.directory + ".pkl"
         print(self.tensor.shape)
-        pickle.dump(self.tensor, open(self.file_name, "wb"))
+        try:
+            pickle.dump(self.tensor, open(self.file_name, "wb"))
+        except OverflowError:
+            print("ERROR: Tensor cannot be saved to pickle file due to size larger than 4 GiB")
         return self.tensor
 
     def parafac_decomposition(self):
