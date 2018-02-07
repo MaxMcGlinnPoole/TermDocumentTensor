@@ -31,3 +31,5 @@ ENV_DIR/*
 *.pkl
 
 shakespeare_duck/*
+
+*.log

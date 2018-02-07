@@ -1,4 +1,3 @@
-from tensorly.tenalg import khatri_rao
 from scipy import spatial
 from collections import deque
 import os
@@ -22,13 +21,6 @@ class TermDocumentTensor():
         # These are the output of our tensor decomposition.
         self.factors = []
         self.file_name = file_name
-
-    def create_factor_matrices(self):
-        tdm_1 = np.matmul(self.factors[0], np.transpose(khatri_rao([self.factors[2], self.factors[1]])))
-        tdm_2 = np.matmul(self.factors[1], np.transpose(khatri_rao([self.factors[2], self.factors[0]])))
-        tdm_3 = np.matmul(self.factors[2], np.transpose(khatri_rao([self.factors[1], self.factors[0]])))
-        self.factors = [tdm_1, tdm_2, tdm_3]
-        return self.factors
 
     def generate_cosine_similarity_matrix(self, matrix):
         cosine_sim = []
