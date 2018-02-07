@@ -77,6 +77,11 @@ class TermDocumentTensor():
                 print(self.corpus_names[i], matrix[i])
 
     def create_term_document_tensor(self, **kwargs):
+        """
+        Generic tensor creation function. Returns different tensor based on user input.
+        :param kwargs:
+        :return:
+        """
         if self.type == "binary":
             return self.create_binary_term_document_tensor(**kwargs)
         else:
@@ -153,6 +158,7 @@ class TermDocumentTensor():
     def create_term_document_tensor_text(self, **kwargs):
         """
         Creates term-sentence-document tensor out of files in directory
+        Attempts to save this tensor to a pickle file
         
         :return: 3-D dense numpy array, self.tensor
         """
@@ -165,10 +171,14 @@ class TermDocumentTensor():
         max_matrix_height = 0
         max_sentences = kwargs["lines"]
         self.corpus_names = os.listdir(self.directory)
+
+        # If given Pickle file, read it in
         if self.file_name is not None:
             file = open(self.file_name, 'rb')
             self.tensor = pickle.load(file)
             return self.tensor
+
+        # Create one large term document matrix from all documents. Done to ensure same vocabulary.
         for file_name in self.corpus_names:
             document_cutoff_positions.append(pos)
             with open(self.directory + "/" + file_name, "r", errors="ignore") as file:
@@ -186,6 +196,7 @@ class TermDocumentTensor():
         x1 = vectorizer.fit_transform(doc_content)
         matrix_length = len(vectorizer.get_feature_names())
 
+        # Split large term document matrix, into term document tensor. Splits happen where one document ends.
         for i in range(len(document_cutoff_positions) - 1):
             temp = x1[document_cutoff_positions[i]:document_cutoff_positions[i + 1], :]
             temp = temp.todense()
@@ -207,6 +218,11 @@ class TermDocumentTensor():
         return self.tensor
 
     def parafac_decomposition(self):
+        """
+        Computes a parafac decomposition of the tensor.
+        This will return n rank 3 factor matrices. Where n represents the dimensionality of the tensor.
+        :return:
+        """
         decompose = KruskalTensor(self.tensor.shape, rank=3, regularize=1e-6, init='nvecs', X_data=self.tensor)
         self.factors = decompose.U
         with tf.Session() as sess:
