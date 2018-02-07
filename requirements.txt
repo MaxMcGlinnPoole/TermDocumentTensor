@@ -28,8 +28,6 @@ pyparsing==2.2.0
 python-dateutil==2.6.1
 pytz==2017.2
 requests==2.18.4
-scikit-learn==0.18.2
-scikit-tensor==0.1
 scipy==0.19.1
 six==1.11.0
 sklearn==0.0
@@ -38,7 +36,6 @@ style==1.1.0
 tensorflow==1.5.0
 tensorflow-tensorboard==1.5.0
 textmining==1.0
-tf-decompose==1.0
 traitlets==4.3.2
 update==0.0.1
 urllib3==1.22
