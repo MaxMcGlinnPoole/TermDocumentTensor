@@ -2,7 +2,6 @@ from tensorly.tenalg import khatri_rao
 from scipy import spatial
 from collections import deque
 import os
-from tensorly.decomposition import parafac
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
@@ -172,7 +171,6 @@ class TermDocumentTensor():
         doc_content = []
         pos = 0
         max_matrix_height = 0
-        svd = TruncatedSVD(n_components=100, n_iter=7, random_state=42)
         max_sentences = kwargs["lines"]
         self.corpus_names = os.listdir(self.directory)
         if self.file_name is not None:
@@ -199,16 +197,17 @@ class TermDocumentTensor():
         for i in range(len(document_cutoff_positions) - 1):
             temp = x1[document_cutoff_positions[i]:document_cutoff_positions[i + 1], :]
             temp = temp.todense()
+            # Make all matrix slices the same size
             term_sentence_matrix = np.zeros((max_matrix_height, matrix_length))
             term_sentence_matrix[:temp.shape[0], :temp.shape[1]] = temp
-            #term_sentence_matrix = svd.fit_transform(term_sentence_matrix)
             if self.tensor is None:
                 self.tensor = term_sentence_matrix
             else:
                 self.tensor = np.dstack((self.tensor, term_sentence_matrix))
 
         self.file_name = self.directory + ".pkl"
-        print(self.tensor.shape)
+        print("Finished tensor construction.")
+        print("Tensor shape:" + str(self.tensor.shape))
         try:
             pickle.dump(self.tensor, open(self.file_name, "wb"))
         except OverflowError:
@@ -222,7 +221,5 @@ class TermDocumentTensor():
             for i in range(len(self.factors)):
                 sess.run(self.factors[i].initializer)
                 self.factors[i] = self.factors[i].eval()
-        #test = self.factors[0].eval(tf.Session())
-        #self.factors = parafac(np.array(self.tensor), rank=self.get_estimated_rank())
         return self.factors
 
