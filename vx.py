@@ -27,7 +27,7 @@ def parse_arguments():
     parser.add_argument("-comp", dest="components", type=int, help="Number of components for the Kmeans clustering",
                         default=2)
     parser.add_argument("-ngrams", "--ngrams", dest="ngrams", type=int,
-                        help="Number of n-grams that will be used in the tensor creation", required=True)
+                        help="Number of n-grams that will be used in the tensor creation", required=False, default=1)
     # Mutually exclusive arguments, in groups.
     # For each group, the first option is true by default,and the rest are false
     ft_group = parser.add_mutually_exclusive_group()
@@ -46,8 +46,15 @@ def parse_arguments():
     args = parser.parse_args()
     return args
 
+
+def display_info_message(args):
+    if args.binary and not args.ngrams:
+        print("WARNING: Constructing a tensor from binary executables with no provided ngrams. Using ngram=1 as default")
+
+
 def main():
     args = parse_arguments()
+    display_info_message(args)
     file_type = "binary" if args.binary else "text"
     tdt = TermDocumentTensor.TermDocumentTensor(args.directory, type=file_type, file_name=args.file)
     tdt.create_term_document_tensor(ngrams=args.ngrams, lines=args.lines)
