@@ -1,20 +1,18 @@
-import csv
-import os
-from tensorly.tenalg import khatri_rao
-from tensorly.decomposition import parafac
-import numpy as np
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from scipy import spatial
 from collections import deque
-import re
-import scipy
-from tensorflow import SparseTensor
+import os
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
+import _pickle as pickle
+import tensorflow as tf
+from ktensor import KruskalTensor
+
 
 class TermDocumentTensor():
-    def __init__(self, directory, type="binary"):
+    def __init__(self, directory, type="binary", file_name=None):
         self.vocab = []
-        self.tdt = []
+        self.tensor = []
         self.corpus_names = []
         self.directory = directory
         self.type = type
@@ -22,14 +20,7 @@ class TermDocumentTensor():
         self.factor_matrices = []
         # These are the output of our tensor decomposition.
         self.factors = []
-        self.tdt_sparse = None
-
-    def create_factor_matrices(self):
-        tdm_1 = np.matmul(self.factors[0], np.transpose(khatri_rao([self.factors[2], self.factors[1]])))
-        tdm_2 = np.matmul(self.factors[1], np.transpose(khatri_rao([self.factors[2], self.factors[0]])))
-        tdm_3 = np.matmul(self.factors[2], np.transpose(khatri_rao([self.factors[1], self.factors[0]])))
-        self.factors = [tdm_1, tdm_2, tdm_3]
-        return self.factors
+        self.file_name = file_name
 
     def generate_cosine_similarity_matrix(self, matrix):
         cosine_sim = []
@@ -51,9 +42,9 @@ class TermDocumentTensor():
         # At the moment the rank returned by this function is normally too high for either
         # my machine or the tensorly library to handle, therefore I have made it just return 1 for right now
 
-        I = len(self.tdt[0])
-        J = len(self.tdt[0][0])
-        K = len(self.tdt)
+        I = len(self.tensor[0])
+        J = len(self.tensor[0][0])
+        K = len(self.tensor)
 
         if I == 1 or J == 1 or K == 1:
             return 1
@@ -80,16 +71,21 @@ class TermDocumentTensor():
             return min(I * J, I * K, J * K)
 
     def print_formatted_term_document_tensor(self):
-        for matrix in self.tdt:
+        for matrix in self.tensor:
             print(self.vocab)
             for i in range(len(matrix)):
                 print(self.corpus_names[i], matrix[i])
 
     def create_term_document_tensor(self, **kwargs):
+        """
+        Generic tensor creation function. Returns different tensor based on user input.
+        :param kwargs:
+        :return:
+        """
         if self.type == "binary":
             return self.create_binary_term_document_tensor(**kwargs)
         else:
-            return self.create_text_corpus(**kwargs)
+            return self.create_term_document_tensor_text(**kwargs)
 
     def create_binary_term_document_tensor(self, **kwargs):
         doc_content = []
@@ -154,66 +150,84 @@ class TermDocumentTensor():
         del tdm_first_occurences
         del tdm
         tdt = [reduced_tdm, reduced_tdm_first_occurences]
-        self.tdt = tdt
+        self.tensor = tdt
         #tdm_sparse = scipy.sparse.csr_matrix(tdm)
         #tdm_first_occurences_sparse = scipy.sparse.csr_matrix(tdm_first_occurences)
-        return self.tdt
+        return self.tensor
 
-    def create_term_document_tensor_text(self):
-        mydoclist = []
-        # tdm = textmining.TermDocumentMatrix()
-        files = []
-        first_occurences_corpus = {}
-        text_names = []
-        number_files = 0
-        for file in os.listdir(self.directory):
-            number_files += 1
-            first_occurences = {}
-            words = 0
-            with open(self.directory + "/" + file, "r") as shake:
-                files.append(file)
-                lines_100 = ""
-                while True:
-                    my_line = shake.readline()
-                    if not my_line:
+    def create_term_document_tensor_text(self, **kwargs):
+        """
+        Creates term-sentence-document tensor out of files in directory
+        Attempts to save this tensor to a pickle file
+        
+        :return: 3-D dense numpy array, self.tensor
+        """
+
+        self.tensor = None
+        vectorizer = TfidfVectorizer(use_idf=False, analyzer="word")
+        document_cutoff_positions = []
+        doc_content = []
+        pos = 0
+        max_matrix_height = 0
+        max_sentences = kwargs["lines"]
+        self.corpus_names = os.listdir(self.directory)
+
+        # If given Pickle file, read it in
+        if self.file_name is not None:
+            file = open(self.file_name, 'rb')
+            self.tensor = pickle.load(file)
+            return self.tensor
+
+        # Create one large term document matrix from all documents. Done to ensure same vocabulary.
+        for file_name in self.corpus_names:
+            document_cutoff_positions.append(pos)
+            with open(self.directory + "/" + file_name, "r", errors="ignore") as file:
+                for line in file:
+                    if len(line) > 2:
+                        pos += 1
+                        doc_content.append(line)
+                    if pos - document_cutoff_positions[-1] >= max_sentences:
                         break
-                    re.sub(r'\W+', '', my_line)
-                    for word in my_line.split():
-                        words += 1
-                        if word not in first_occurences:
-                            first_occurences[word] = words
-                    lines_100 += my_line
-            first_occurences_corpus[file] = first_occurences
-            tdm.add_doc(lines_100)
-            mydoclist.append(file)
-            text_names.append(file)
-        tdm = list(tdm.rows(cutoff=1))
-        tdt = [0, 0]
-        tdm_first_occurences = []
-        # tdm_first_occurences[0] = tdm[0]
-        # Create a first occurences matrix that corresponds with the tdm
-        for j in range(len(text_names)):
-            item = text_names[j]
-            this_tdm = []
-            for i in range(0, len(tdm[0])):
-                word = tdm[0][i]
-                try:
-                    this_tdm.append(first_occurences_corpus[item][word])
-                except:
-                    this_tdm.append(0)
-            # print(this_tdm)
-            tdm_first_occurences.append(this_tdm)
-        self.vocab = tdm.pop(0)
-        self.corpus_names = mydoclist
-        tdt[0] = tdm
-        tdt[1] = tdm_first_occurences
-        tdt = np.asanyarray(tdt)
-        del tdm
-        del tdm_first_occurences
-        self.tdt = tdt
-        return tdt
+                if max_matrix_height < pos - document_cutoff_positions[-1]:
+                    max_matrix_height = pos - document_cutoff_positions[-1]
+
+        document_cutoff_positions.append(pos)
+
+        x1 = vectorizer.fit_transform(doc_content)
+        matrix_length = len(vectorizer.get_feature_names())
+
+        # Split large term document matrix, into term document tensor. Splits happen where one document ends.
+        for i in range(len(document_cutoff_positions) - 1):
+            temp = x1[document_cutoff_positions[i]:document_cutoff_positions[i + 1], :]
+            temp = temp.todense()
+            # Make all matrix slices the same size
+            term_sentence_matrix = np.zeros((max_matrix_height, matrix_length))
+            term_sentence_matrix[:temp.shape[0], :temp.shape[1]] = temp
+            if self.tensor is None:
+                self.tensor = term_sentence_matrix
+            else:
+                self.tensor = np.dstack((self.tensor, term_sentence_matrix))
+
+        self.file_name = self.directory + ".pkl"
+        print("Finished tensor construction.")
+        print("Tensor shape:" + str(self.tensor.shape))
+        try:
+            pickle.dump(self.tensor, open(self.file_name, "wb"))
+        except OverflowError:
+            print("ERROR: Tensor cannot be saved to pickle file due to size larger than 4 GiB")
+        return self.tensor
 
     def parafac_decomposition(self):
-        self.factors = parafac(np.array(self.tdt), rank=self.get_estimated_rank())
+        """
+        Computes a parafac decomposition of the tensor.
+        This will return n rank 3 factor matrices. Where n represents the dimensionality of the tensor.
+        :return:
+        """
+        decompose = KruskalTensor(self.tensor.shape, rank=3, regularize=1e-6, init='nvecs', X_data=self.tensor)
+        self.factors = decompose.U
+        with tf.Session() as sess:
+            for i in range(len(self.factors)):
+                sess.run(self.factors[i].initializer)
+                self.factors[i] = self.factors[i].eval()
         return self.factors
 
