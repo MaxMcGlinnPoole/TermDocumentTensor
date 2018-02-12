@@ -223,7 +223,7 @@ class TermDocumentTensor():
         This will return n rank 3 factor matrices. Where n represents the dimensionality of the tensor.
         :return:
         """
-        decompose = KruskalTensor(self.tensor.shape, rank=3, regularize=1e-6, init='nvecs', X_data=self.tensor)
+        decompose = KruskalTensor(self.tensor.shape, rank=4, regularize=1e-6, init='nvecs', X_data=self.tensor)
         self.factors = decompose.U
         with tf.Session() as sess:
             for i in range(len(self.factors)):

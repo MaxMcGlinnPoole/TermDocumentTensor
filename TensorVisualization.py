@@ -2,6 +2,7 @@ import plotly
 import plotly.graph_objs as go
 from sklearn.cluster import KMeans
 from sklearn.decomposition import TruncatedSVD
+import numpy as np
 
 
 
@@ -34,15 +35,33 @@ class TensorVisualization():
         plotly.offline.plot(fig,filename='malware_heatmap.html')
 
     def k_means_clustering(self, factor_matrix, file_names=[], clusters=2):
+        print("clusters is " + str(clusters))
         svd = TruncatedSVD(n_components=clusters, n_iter=7, random_state=42)
         reduced = svd.fit_transform(factor_matrix)
         kmeans = KMeans(n_clusters=clusters, random_state=0).fit(factor_matrix)
-        data = [plotly.graph_objs.Scatter(x=[entry[0] for entry in reduced],
-                                          y=[entry[1] for entry in reduced],
-                                          mode='markers',
-                                          marker=dict(color=kmeans.labels_),
-                                          text=file_names
-                                          )
-                ]
+        labels = kmeans.labels_
+        if clusters == 2:
+            data = [go.Scatter(x=[entry[0] for entry in reduced],
+                                              y=[entry[1] for entry in reduced],
+                                              mode='markers',
+                                              marker=dict(
+                                                  color=labels.astype(np.float),
+                                                  line=dict(color='black', width=1)),
+                                              text=file_names
+                                              )
+                    ]
+        elif clusters == 3:
+            data = [go.Scatter3d(x=[entry[0] for entry in reduced],
+                                 y=[entry[1] for entry in reduced],
+                                 z=[entry[2] for entry in reduced],
+                                 showlegend=False,
+                                 mode='markers',
+                                 marker=dict(
+                                     color=labels.astype(np.float),
+                                     line=dict(color='black', width=1),
+
+                                 ),
+                                text=file_names)]
+
         fig = go.Figure(data=data)
         plotly.offline.plot(fig, filename='kmeans_cluster.html')
