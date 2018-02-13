@@ -26,6 +26,7 @@ source venv/bin/activate
 Next install the project requirements
 ```
 pip install -r requirements.txt
+pip install git+https://github.com/MaxMcGlinnPoole/tf-decompose.git
 ```
 
 

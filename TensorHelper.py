@@ -1,7 +1,6 @@
 import numpy as np
 
 
-
 def create_matricization(tensor):
     K = len(tensor)
     I = len(tensor[0])
