@@ -1,6 +1,5 @@
 import plotly
 import plotly.graph_objs as go
-import matplotlib as plt
 from sklearn.cluster import KMeans
 from sklearn.decomposition import TruncatedSVD
 import time

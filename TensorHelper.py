@@ -1,7 +1,6 @@
 import numpy as np
 
 
-
 def create_matricization(tensor):
     print("In tensor helped,Creating a tensor matrix  ")
     K = len(tensor)
