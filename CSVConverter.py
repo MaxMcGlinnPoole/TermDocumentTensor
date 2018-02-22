@@ -10,6 +10,7 @@ def convert_term_document_tensor_to_csv(tdt, file_name):
     :param file_name: The name of the file that will be written to
     :return: None
     """
+    print("converting the TDM to csv")
     if isinstance(tdt[0][0], list):
         tdt = tdt[0]
     with open(file_name + ".csv", "w", newline='') as csv_file:
@@ -31,6 +32,7 @@ def generate_term_list_csv(corpus_name, file_name, number_terms = 61, binary=Tru
                           May be useful for some representation methods
     :return: None
     """
+    print("Generating the term,list of csv document")
     if binary:
         generate_binary_term_list(corpus_name, file_name, **kwargs)
     else:
@@ -43,6 +45,7 @@ def generate_binary_term_list(corpus_name, file_name, number_terms=61, numerical
     Meant to be called from generate_term_list_csv
     :return: None
     """
+    print("Generating term,list,freq from binary csv ")
     my_binary = []
     files = glob.glob(corpus_name + "/*")
     ntpath.basename(corpus_name + "/")
@@ -75,6 +78,7 @@ def generate_text_term_list(corpus_name, file_name, number_terms=61, **kwargs):
     Meant to be called from generate_term_list_csv
     :return: None
     """
+    print("Generating text term list in generic  ")
     my_terms = []
     files = glob.glob(corpus_name + "/*")
     ntpath.basename(corpus_name + "/")
@@ -102,6 +106,7 @@ def write_term_list_to_csv(file_name, my_terms, number_terms, transpose=False):
     Meant to be called by the generate_term_list files
     :return: None
     """
+    print("Writing the term,list into csv ")
     my_csv_rep = []
     header = ["files"]
     header.extend(["byte" + str(i) for i in range(0, number_terms)])

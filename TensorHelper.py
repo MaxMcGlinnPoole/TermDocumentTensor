@@ -3,6 +3,7 @@ import numpy as np
 
 
 def create_matricization(tensor):
+    print("In tensor helped,Creating a tensor matrix  ")
     K = len(tensor)
     I = len(tensor[0])
     J = len(tensor[0][0])
