@@ -2,7 +2,15 @@ import plotly
 import plotly.graph_objs as go
 from sklearn.cluster import KMeans
 from sklearn.decomposition import TruncatedSVD
+import time
+import scipy.cluster.hierarchy
+import scipy.spatial.distance
 
+
+
+def flag_function_visualization(cmts):
+    global flag
+    flag = cmts
 
 
 class TensorVisualization():
@@ -17,6 +25,8 @@ class TensorVisualization():
         :param axis_labels:
         :return:
         """
+        if flag==1:
+            print("Generating Heatmap ")
         axis_labels_abbreviated = [label[:14] for label in axis_labels]
         info = [go.Heatmap(z=data,
                            x=axis_labels_abbreviated,

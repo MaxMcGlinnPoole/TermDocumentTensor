@@ -1,6 +1,7 @@
 import TermDocumentTensor
 import TensorVisualization
 import argparse
+import time
 
 
 def parse_arguments():
@@ -24,10 +25,14 @@ def parse_arguments():
     parser.add_argument("-lines", dest="lines", help="The max number of lines that should be read from each file to "
                                                      "make the decomposition. By default this is 100",
                         default=100, type=int)
+    parser.add_argument("-Comments", dest="Comments", help="y/n if you want comments ",
+
+                        default='Yes', type=str)
     parser.add_argument("-comp", dest="components", type=int, help="Number of components for the Kmeans clustering",
                         default=2)
     parser.add_argument("-ngrams", "--ngrams", dest="ngrams", type=int,
                         help="Number of n-grams that will be used in the tensor creation", required=False, default=1)
+
     # Mutually exclusive arguments, in groups.
     # For each group, the first option is true by default,and the rest are false
     ft_group = parser.add_mutually_exclusive_group()
@@ -53,8 +58,21 @@ def display_info_message(args):
 
 
 def main():
+    start_time = time.time()
     args = parse_arguments()
-    display_info_message(args)
+    flag = args.Comments
+
+    if flag[0] == "y" or flag[0] == "Y":
+        flag = 1
+    else:
+        flag = 0
+
+    TermDocumentTensor.flag_function_tdm(flag)
+    TensorVisualization.flag_function_visualization(flag)
+
+    if flag == 1:
+        print("About to run the term document tensor")
+
     file_type = "binary" if args.binary else "text"
     tdt = TermDocumentTensor.TermDocumentTensor(args.directory, type=file_type, file_name=args.file)
     tdt.create_term_document_tensor(ngrams=args.ngrams, lines=args.lines)
@@ -68,6 +86,8 @@ def main():
         visualize.generate_heat_map(cos_sim, tdt.corpus_names)
     if args.kmeans:
         visualize.k_means_clustering(factors[args.axis], tdt.corpus_names, clusters=args.components)
+    if flag == 1:
+        print("  %s seconds is the total time for program to execute" % format((time.time() - start_time), '.2f'))
 
 
 main()

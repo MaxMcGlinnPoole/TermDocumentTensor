@@ -7,10 +7,18 @@ from sklearn.decomposition import TruncatedSVD
 import _pickle as pickle
 import tensorflow as tf
 from ktensor import KruskalTensor
+import time
+
+
+def flag_function_tdm(cmts):
+        global flag
+        flag = cmts
 
 
 class TermDocumentTensor():
     def __init__(self, directory, type="binary", file_name=None):
+        if flag==1:
+            print("Initilizing the Tensor")
         self.vocab = []
         self.tensor = []
         self.corpus_names = []
@@ -23,6 +31,8 @@ class TermDocumentTensor():
         self.file_name = file_name
 
     def generate_cosine_similarity_matrix(self, matrix):
+        if flag == 1:
+            print("Generating a cosine similarity matrix")
         cosine_sim = []
         for entry in matrix:
             sim = []
@@ -41,7 +51,8 @@ class TermDocumentTensor():
         """
         # At the moment the rank returned by this function is normally too high for either
         # my machine or the tensorly library to handle, therefore I have made it just return 1 for right now
-
+        if flag == 1:
+            print("Estimation of the rank of tensor ")
         I = len(self.tensor[0])
         J = len(self.tensor[0][0])
         K = len(self.tensor)
@@ -71,6 +82,8 @@ class TermDocumentTensor():
             return min(I * J, I * K, J * K)
 
     def print_formatted_term_document_tensor(self):
+        if flag == 1:
+            print("Print the TDM")
         for matrix in self.tensor:
             print(self.vocab)
             for i in range(len(matrix)):
@@ -82,12 +95,17 @@ class TermDocumentTensor():
         :param kwargs:
         :return:
         """
+        if flag == 1:
+            print("Creating a TermDocumentTensor")
         if self.type == "binary":
             return self.create_binary_term_document_tensor(**kwargs)
         else:
             return self.create_term_document_tensor_text(**kwargs)
 
     def create_binary_term_document_tensor(self, **kwargs):
+        start_time1 = time.time()
+        if flag == 1:
+            print("Binary TermDocumentTensor")
         doc_content = []
         first_occurences_corpus = {}
         ngrams = kwargs["ngrams"] if kwargs["ngrams"] is not None else 1
@@ -153,6 +171,8 @@ class TermDocumentTensor():
         self.tensor = tdt
         #tdm_sparse = scipy.sparse.csr_matrix(tdm)
         #tdm_first_occurences_sparse = scipy.sparse.csr_matrix(tdm_first_occurences)
+        if flag == 1:
+            print("  %s seconds for TDM Binary" % format((time.time() - start_time1),'.2f'))
         return self.tensor
 
     def create_term_document_tensor_text(self, **kwargs):
@@ -162,6 +182,9 @@ class TermDocumentTensor():
         
         :return: 3-D dense numpy array, self.tensor
         """
+        start_time2 = time.time()
+        if flag == 1:
+            print("Document TermDocumentTensor")
 
         self.tensor = None
         vectorizer = TfidfVectorizer(use_idf=False, analyzer="word")
@@ -209,12 +232,16 @@ class TermDocumentTensor():
                 self.tensor = np.dstack((self.tensor, term_sentence_matrix))
 
         self.file_name = self.directory + ".pkl"
-        print("Finished tensor construction.")
-        print("Tensor shape:" + str(self.tensor.shape))
+        if flag == 1:
+            print("Finished tensor construction.")
+        if flag == 1:
+            print("Tensor shape:" + str(self.tensor.shape))
         try:
             pickle.dump(self.tensor, open(self.file_name, "wb"))
         except OverflowError:
             print("ERROR: Tensor cannot be saved to pickle file due to size larger than 4 GiB")
+        if flag == 1:
+            print("  %s seconds for TDM document" % format((time.time() - start_time2),'.2f'))
         return self.tensor
 
     def parafac_decomposition(self):
@@ -223,11 +250,16 @@ class TermDocumentTensor():
         This will return n rank 3 factor matrices. Where n represents the dimensionality of the tensor.
         :return:
         """
+        start_time3 = time.time()
+        if flag == 1:
+            print("In decomposition of a TDM")
         decompose = KruskalTensor(self.tensor.shape, rank=3, regularize=1e-6, init='nvecs', X_data=self.tensor)
         self.factors = decompose.U
         with tf.Session() as sess:
             for i in range(len(self.factors)):
                 sess.run(self.factors[i].initializer)
                 self.factors[i] = self.factors[i].eval()
+        if flag == 1:
+            print("  %s seconds for decomposition of a tensor" % format((time.time() - start_time3), '.2f'))
         return self.factors
 
