@@ -33,3 +33,6 @@ ENV_DIR/*
 shakespeare_duck/*
 
 *.log
+
+PEFILE_Scripts/output/*
+
