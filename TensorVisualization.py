@@ -6,6 +6,7 @@ import time
 import scipy.cluster.hierarchy
 import scipy.spatial.distance
 from collections import Counter
+import accuracy
 
 
 def flag_function_visualization(cmts):
@@ -48,33 +49,8 @@ class TensorVisualization():
         reduced = svd.fit_transform(factor_matrix)
         kmeans = KMeans(n_clusters=clusters, random_state=0).fit(factor_matrix)
         labels_predicted = kmeans.labels_
-        res = Counter(kmeans.labels_)
-        val = list(res.values())
-        president_data = 0
-        shakespeare_data = 0
-        president_data_correct = 0
-        shakespeare_data_correct = 0
-
-        for i in range(0, len(file_names)):
-            filename = file_names[i]
-            str = filename[1:4]
-            if TensorVisualization.RepresentsInt(str):
-                president_data = president_data + 1
-                if labels_predicted[i] == 0:
-                    president_data_correct = president_data_correct + 1
-            else:
-                shakespeare_data = shakespeare_data + 1
-                if labels_predicted[i] == 1:
-                    shakespeare_data_correct = shakespeare_data_correct + 1
-
-        print("Number of president text files are", president_data)
-        print("Number of president text files predicted correctly is", president_data)
-        print("Accuracy : ", (president_data_correct / president_data) * 100)
-
-        print("Number of shakespeare text files are", shakespeare_data)
-        print("Number of shakespeare text files predicted correctly is", shakespeare_data_correct)
-        print("Accuracy : ", (shakespeare_data_correct / shakespeare_data) * 100)
-
+        if flag == 1:
+            accuracy.findingAccuracy_shakespeare(file_names, labels_predicted)
         data = [plotly.graph_objs.Scatter(x=[entry[0] for entry in reduced],
                                           y=[entry[1] for entry in reduced],
                                           mode='markers',
@@ -84,11 +60,4 @@ class TensorVisualization():
                 ]
         fig = go.Figure(data=data)
         plotly.offline.plot(fig, filename='kmeans_cluster.html')
-
-    def RepresentsInt(s):
-        try:
-            int(s)
-            return True
-        except ValueError:
-            return False
 
