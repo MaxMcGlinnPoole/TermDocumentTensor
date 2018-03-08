@@ -21,17 +21,22 @@ class PEFile():
         try:
             pe = pefile.PE(file_location)
         except Exception as e:
+            print(file_location)
             print(e)
             return
-        timedate = pe.FILE_HEADER.TimeDateStamp
+        file_header = pe.NT_HEADERS.FILE_HEADER.__dict__
+        opt_header = pe.OPTIONAL_HEADER.__dict__
+        timedate = file_header["TimeDateStamp"]
 
         functions = []
         dlls = []
         characteristics = []
         sections_flags = []
         times = []
+        sizes = []
         various = []
         timedate = time.localtime(timedate)
+
         if timedate.tm_year < 1992:
             times.append("before")
         elif timedate.tm_year > 2015:
@@ -46,8 +51,8 @@ class PEFile():
             for flag in self.sections_flags:
                 if section[flag]:
                     sections_flags.append(flag)
-
-        file_header = pe.NT_HEADERS.FILE_HEADER.__dict__
+        if len(sections_flags) == 0:
+            sections_flags.append("NONE")
         for flag in self.file_header_characteristics:
             if file_header[flag]:
                 characteristics.append(flag)
@@ -70,9 +75,22 @@ class PEFile():
         else:
             functions.append("NONE")
             dlls.append("NONE")
-        if hasattr(pe, "DIRECTORY_ENTRY_EXPORT"):
-            for exp in pe.DIRECTORY_ENTRY_EXPORT.symbols:
-                print(exp.name, exp.ordinal)
+        size = os.stat(file_location).st_size
+        code_ratio = opt_header["SizeOfCode"]/size
+        initial_ratio = opt_header["SizeOfInitializedData"]/size
+        uninitial_ratio = opt_header["SizeOfUninitializedData"]/size
+        image_ratio = opt_header["SizeOfImage"]/size
+        header_ratio = opt_header["SizeOfHeaders"]/size
+        if code_ratio > 1:
+            sizes.append("code_abnormal")
+        if initial_ratio > 3:
+            sizes.append("initial_abnormal")
+        if uninitial_ratio > 1:
+            sizes.append("uninitial_abnormal")
+        if image_ratio > 8:
+            sizes.append("image_abnormal")
+        if header_ratio > 0:
+            sizes.append("header_abnormal")
 
 
         self.file_information.append(functions)
@@ -80,6 +98,7 @@ class PEFile():
         self.file_information.append(characteristics)
         self.file_information.append(sections_flags)
         self.file_information.append(times)
+        self.file_information.append(sizes)
         self.file_information.append(various)
 
     def write_to_file(self, save_path):
