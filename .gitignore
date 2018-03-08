@@ -36,3 +36,7 @@ shakespeare_duck/*
 
 PEFILE_Scripts/output/*
 
+
+*.exe
+
+*.ex0

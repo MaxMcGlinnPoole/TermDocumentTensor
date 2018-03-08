@@ -29,7 +29,6 @@ class PEFile():
         dlls = []
         characteristics = []
         sections_flags = []
-        warnings = []
         times = []
         various = []
         timedate = time.localtime(timedate)
@@ -74,11 +73,8 @@ class PEFile():
         if hasattr(pe, "DIRECTORY_ENTRY_EXPORT"):
             for exp in pe.DIRECTORY_ENTRY_EXPORT.symbols:
                 print(exp.name, exp.ordinal)
-        if hasattr(pe, "_PE_warnings"):
-            for warning in pe._PE_warnings:
-                warnings.append(warning)
-        else:
-            warnings.append("NONE")
+
+
         self.file_information.append(functions)
         self.file_information.append(dlls)
         self.file_information.append(characteristics)
