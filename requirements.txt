@@ -10,7 +10,7 @@ jsonschema==2.6.0
 jupyter-core==4.4.0
 Markdown==2.6.11
 nbformat==4.4.0
-numpy==1.14.0
+numpy==1.22.0
 plotly==2.3.0
 protobuf==3.5.1
 pytz==2018.3
